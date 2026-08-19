@@ -5,7 +5,7 @@
 TEST(OrderTest, CreatesBuyOrder)
 {
     exchange::Order order{
-        1,
+        exchange::OrderId{1},
         "AAPL",
         exchange::Side::Buy,
         100,
@@ -13,7 +13,7 @@ TEST(OrderTest, CreatesBuyOrder)
         18550
     };
 
-    EXPECT_EQ(order.id, 1);
+    EXPECT_EQ(order.id.value, 1);
     EXPECT_EQ(order.symbol, "AAPL");
     EXPECT_EQ(order.side, exchange::Side::Buy);
     EXPECT_EQ(order.quantity, 100);
@@ -24,7 +24,7 @@ TEST(OrderTest, CreatesBuyOrder)
 TEST(OrderTest, PartiallyFillsOrder)
 {
     exchange::Order order{
-        1,
+        exchange::OrderId{1},
         "AAPL",
         exchange::Side::Buy,
         100,
@@ -41,7 +41,7 @@ TEST(OrderTest, PartiallyFillsOrder)
 TEST(OrderTest, RejectsFillExceedingRemainingQuantity)
 {
     exchange::Order order{
-        1,
+        exchange::OrderId{1},
         "AAPL",
         exchange::Side::Buy,
         100,
@@ -57,7 +57,7 @@ TEST(OrderTest, RejectsFillExceedingRemainingQuantity)
 TEST(OrderTest, FullyFillsOrder)
 {
     exchange::Order order{
-        1,
+        exchange::OrderId{1},
         "AAPL",
         exchange::Side::Buy,
         100,
