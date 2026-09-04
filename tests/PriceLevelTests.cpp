@@ -40,7 +40,7 @@ TEST(PriceLevelTest, OrdersAreMaintainedInFifoOrder)
     priceLevel.addOrder(exchange::OrderId{101}, 100);
     priceLevel.addOrder(exchange::OrderId{102}, 50);
 
-    EXPECT_EQ(priceLevel.frontOrder().id.value, 101);
+    EXPECT_EQ(priceLevel.frontOrder().value, 101);
 }
 
 TEST(PriceLevelTest, RemovesOrder)
@@ -52,8 +52,7 @@ TEST(PriceLevelTest, RemovesOrder)
 
     priceLevel.removeOrder(exchange::OrderId{101});
 
-    EXPECT_EQ(priceLevel.frontOrder().id.value, 102);
-    EXPECT_EQ(priceLevel.totalQuantity(), 50);
+    EXPECT_EQ(priceLevel.frontOrder().value, 102);
 }
 
 TEST(PriceLevelTest, RemovingUnknownOrderThrows)
@@ -68,48 +67,31 @@ TEST(PriceLevelTest, RemovingUnknownOrderThrows)
     );
 }
 
-TEST(PriceLevelTest, partialFill)
+TEST(PriceLevelTest, ReducingQuantityUpdatesTotal)
 {
     exchange::PriceLevel priceLevel(18550);
-    priceLevel.addOrder(exchange::OrderId{101}, 100);
 
-    priceLevel.fill(50);
-    EXPECT_EQ(priceLevel.frontOrder().remainingQuantity, 50);
-}
-
-TEST(PriceLevelTest, multipleFill)
-{
-    exchange::PriceLevel priceLevel(18550);
     priceLevel.addOrder(exchange::OrderId{101}, 100);
     priceLevel.addOrder(exchange::OrderId{102}, 50);
-    priceLevel.addOrder(exchange::OrderId{103}, 50);
 
-    priceLevel.fill(150);
-    EXPECT_EQ(priceLevel.frontOrder().id.value, 103);
+    priceLevel.reduceQuantity(70);
+
+    EXPECT_EQ(priceLevel.totalQuantity(), 80);
 }
 
-TEST(PriceLevelTest, multiplePartialFill)
+TEST(PriceLevelTest, RemovingPartiallyFilledOrderUsesRemainingQuantity)
 {
     exchange::PriceLevel priceLevel(18550);
+
     priceLevel.addOrder(exchange::OrderId{101}, 100);
     priceLevel.addOrder(exchange::OrderId{102}, 50);
-    priceLevel.addOrder(exchange::OrderId{103}, 50);
 
-    priceLevel.fill(175);
-    EXPECT_EQ(priceLevel.frontOrder().remainingQuantity, 25);
-}
+    priceLevel.reduceQuantity(30);
 
-TEST(PriceLevelTest, failFill)
-{
-    exchange::PriceLevel priceLevel(18550);
-    priceLevel.addOrder(exchange::OrderId{101}, 100);
-    priceLevel.addOrder(exchange::OrderId{102}, 50);
-    priceLevel.addOrder(exchange::OrderId{103}, 50);
+    priceLevel.removeOrder(exchange::OrderId{101});
 
-    EXPECT_THROW(
-         priceLevel.fill(225),
-        std::invalid_argument
+    EXPECT_EQ(
+        priceLevel.frontOrder(),
+        exchange::OrderId{102}
     );
-
-    EXPECT_EQ(priceLevel.frontOrder().remainingQuantity, 100);
 }

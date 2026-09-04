@@ -15,6 +15,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(exchange
     src/exchange/PriceLevel.cpp
+    src/exchange/OrderBook.cpp
+    src/exchange/MatchingEngine.cpp
 )
 
 target_include_directories(exchange
@@ -58,6 +60,9 @@ enable_testing()
 add_executable(unit_tests
     tests/OrderTests.cpp
     tests/PriceLevelTests.cpp
+    tests/OrderBookTests.cpp
+    tests/TradeTests.cpp
+    tests/MatchingEngineTests.cpp
 )
 
 target_link_libraries(unit_tests

@@ -6,7 +6,7 @@
 #include <deque>
 #include <algorithm>
 #include <exchange/OrderId.h>
-#include <exchange/OrderEntry.h>
+
 
 namespace exchange
 {
@@ -23,16 +23,18 @@ namespace exchange
 
         uint64_t totalQuantity() const;
 
-        void fill(uint64_t quantity);
-
         bool empty() const;
 
-        const OrderEntry& frontOrder() const;
+        const OrderId& frontOrder() const;
+
+        void reduceQuantity(uint64_t quantity);
+
+        void addQuantity(uint64_t quantity);
 
     private:
         int64_t priceInCents_;
-        std::deque<OrderEntry> orders_;
-        uint64_t totalQuantity_{0};
+        std::deque<OrderId> orders_;
+        uint64_t totalRemainingQuantity_;
     };
     
 } // namespace exchange

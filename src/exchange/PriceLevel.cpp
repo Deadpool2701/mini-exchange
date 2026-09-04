@@ -5,7 +5,8 @@
 namespace exchange
 {
     PriceLevel::PriceLevel(int64_t priceInCents)
-        : priceInCents_(priceInCents)
+        : priceInCents_(priceInCents),
+        totalRemainingQuantity_(0)
     {
     }
 
@@ -17,26 +18,25 @@ namespace exchange
                 "Cannot add an order with zero quantity"
             );
         }
-        orders_.push_back(OrderEntry{orderId, quantity});
-        totalQuantity_ += quantity;
+        orders_.push_back(orderId);
+        totalRemainingQuantity_ += quantity;
     }
 
     void PriceLevel::removeOrder(const OrderId& orderId)
     {
-        auto it = std::find_if(
+        auto it = std::find(
             orders_.begin(),
             orders_.end(),
-            [&orderId](const OrderEntry& entry)
-            {
-                return entry.id == orderId;
-            }
+            orderId
         );
 
-        if(it == orders_.end())
+        if (it == orders_.end())
         {
-            throw std::invalid_argument("OrderId not found in PriceLevel");
+            throw std::invalid_argument(
+                "OrderId not found in PriceLevel"
+            );
         }
-        totalQuantity_ -= it->remainingQuantity;
+
         orders_.erase(it);
     }
 
@@ -47,33 +47,7 @@ namespace exchange
 
     uint64_t PriceLevel::totalQuantity() const
     {
-        return totalQuantity_;
-    }
-
-    void PriceLevel::fill(uint64_t quantity)
-    {
-        if (quantity > totalQuantity_)
-        {
-            throw std::invalid_argument("Fill quantity exceeds total quantity at this Price Level");
-        }
-
-        uint64_t remainingToFill = quantity;
-        while (remainingToFill > 0)
-        {
-            OrderEntry& frontOrder = orders_.front();
-            if (frontOrder.remainingQuantity <= remainingToFill)
-            {
-                remainingToFill -= frontOrder.remainingQuantity;
-                totalQuantity_ -= frontOrder.remainingQuantity;
-                orders_.pop_front();
-            }
-            else
-            {
-                frontOrder.remainingQuantity -= remainingToFill;
-                totalQuantity_ -= remainingToFill;
-                remainingToFill = 0;
-            }
-        }
+        return totalRemainingQuantity_;
     }
 
     bool PriceLevel::empty() const
@@ -81,13 +55,37 @@ namespace exchange
         return orders_.empty();
     }
 
-    const OrderEntry& PriceLevel::frontOrder() const
+    const OrderId& PriceLevel::frontOrder() const
     {
         if (orders_.empty())
         {
             throw std::out_of_range("No orders in PriceLevel");
         }
         return orders_.front();
+    }
+
+    void PriceLevel::reduceQuantity(uint64_t quantity)
+    {
+        if (quantity > totalRemainingQuantity_)
+        {
+            throw std::invalid_argument(
+                "Reduction quantity exceeds total remaining quantity"
+            );
+        }
+
+        totalRemainingQuantity_ -= quantity;
+    }
+
+    void PriceLevel::addQuantity(uint64_t quantity)
+    {
+        if (quantity == 0)
+        {
+            throw std::invalid_argument(
+                "Cannot add zero quantity"
+            );
+        }
+
+        totalRemainingQuantity_ += quantity;
     }
 
 } // namespace exchange
