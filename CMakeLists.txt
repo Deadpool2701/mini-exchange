@@ -17,6 +17,7 @@ add_library(exchange
     src/exchange/PriceLevel.cpp
     src/exchange/OrderBook.cpp
     src/exchange/MatchingEngine.cpp
+    src/exchange/Exchange.cpp
 )
 
 target_include_directories(exchange
@@ -63,6 +64,7 @@ add_executable(unit_tests
     tests/OrderBookTests.cpp
     tests/TradeTests.cpp
     tests/MatchingEngineTests.cpp
+    tests/ExchangeTests.cpp
 )
 
 target_link_libraries(unit_tests

@@ -400,4 +400,24 @@ namespace exchange
             );
         }
     }
+
+    std::vector<BookLevel> OrderBook::bids() const
+    {
+        std::vector<BookLevel> bidLevels;
+        for (const auto& [price, priceLevel] : bids_)
+        {
+            bidLevels.push_back({price, priceLevel.totalQuantity()});
+        }
+        return bidLevels;
+    }
+
+    std::vector<BookLevel> OrderBook::asks() const
+    {
+        std::vector<BookLevel> askLevels;
+        for (const auto& [price, priceLevel] : asks_)
+        {
+            askLevels.push_back({price, priceLevel.totalQuantity()});
+        }
+        return askLevels;
+    }
 }

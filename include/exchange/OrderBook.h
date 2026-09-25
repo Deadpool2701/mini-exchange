@@ -5,7 +5,9 @@
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
+#include <exchange/BookLevel.h>
 #include <exchange/Order.h>
 #include <exchange/PriceLevel.h>
 #include <exchange/OrderId.h>
@@ -40,6 +42,9 @@ namespace exchange
             void amendOrder(const OrderId& orderId, uint64_t newQuantity, int64_t newPriceInCents);
 
             const std::string& symbol() const;
+
+            std::vector<BookLevel> bids() const;
+            std::vector<BookLevel> asks() const;
 
         private:
             std::string symbol_;

@@ -593,3 +593,160 @@ TEST(OrderBookTest, RejectsFillGreaterThanRemainingQuantity)
 
     EXPECT_EQ(order->remainingQuantity, 100);
 }
+
+TEST(OrderBookTest, EmptyBookHasNoBidLevels)
+{
+    exchange::OrderBook book("AAPL");
+
+    EXPECT_TRUE(book.bids().empty());
+}
+
+TEST(OrderBookTest, EmptyBookHasNoAskLevels)
+{
+    exchange::OrderBook book("AAPL");
+
+    EXPECT_TRUE(book.asks().empty());
+}
+
+TEST(OrderBookTest, ReturnsBidLevelsHighestPriceFirst)
+{
+    exchange::OrderBook book("AAPL");
+
+    book.addOrder({
+        exchange::OrderId{101},
+        "AAPL",
+        exchange::Side::Buy,
+        100,
+        100,
+        18540
+    });
+
+    book.addOrder({
+        exchange::OrderId{102},
+        "AAPL",
+        exchange::Side::Buy,
+        50,
+        50,
+        18560
+    });
+
+    book.addOrder({
+        exchange::OrderId{103},
+        "AAPL",
+        exchange::Side::Buy,
+        75,
+        75,
+        18550
+    });
+
+    auto levels = book.bids();
+
+    ASSERT_EQ(levels.size(), 3);
+
+    EXPECT_EQ(levels[0].priceInCents, 18560);
+    EXPECT_EQ(levels[1].priceInCents, 18550);
+    EXPECT_EQ(levels[2].priceInCents, 18540);
+}
+
+TEST(OrderBookTest, ReturnsAskLevelsLowestPriceFirst)
+{
+    exchange::OrderBook book("AAPL");
+
+    book.addOrder({
+        exchange::OrderId{201},
+        "AAPL",
+        exchange::Side::Sell,
+        100,
+        100,
+        18580
+    });
+
+    book.addOrder({
+        exchange::OrderId{202},
+        "AAPL",
+        exchange::Side::Sell,
+        50,
+        50,
+        18560
+    });
+
+    book.addOrder({
+        exchange::OrderId{203},
+        "AAPL",
+        exchange::Side::Sell,
+        75,
+        75,
+        18570
+    });
+
+    auto levels = book.asks();
+
+    ASSERT_EQ(levels.size(), 3);
+
+    EXPECT_EQ(levels[0].priceInCents, 18560);
+    EXPECT_EQ(levels[1].priceInCents, 18570);
+    EXPECT_EQ(levels[2].priceInCents, 18580);
+}
+
+TEST(OrderBookTest, AggregatesQuantityAtSameBidPrice)
+{
+    exchange::OrderBook book("AAPL");
+
+    book.addOrder({
+        exchange::OrderId{101},
+        "AAPL",
+        exchange::Side::Buy,
+        100,
+        100,
+        18550
+    });
+
+    book.addOrder({
+        exchange::OrderId{102},
+        "AAPL",
+        exchange::Side::Buy,
+        50,
+        50,
+        18550
+    });
+
+    auto levels = book.bids();
+
+    ASSERT_EQ(levels.size(), 1);
+
+    EXPECT_EQ(levels[0].priceInCents, 18550);
+    EXPECT_EQ(levels[0].quantity, 150);
+}
+
+TEST(OrderBookTest, BookLevelReflectsCancellation)
+{
+    exchange::OrderBook book("AAPL");
+
+    book.addOrder({
+        exchange::OrderId{101},
+        "AAPL",
+        exchange::Side::Buy,
+        100,
+        100,
+        18550
+    });
+
+    book.addOrder({
+        exchange::OrderId{102},
+        "AAPL",
+        exchange::Side::Buy,
+        50,
+        50,
+        18550
+    });
+
+    book.cancelOrder(exchange::OrderId{101});
+
+    auto levels = book.bids();
+
+    ASSERT_EQ(levels.size(), 1);
+
+    EXPECT_EQ(levels[0].priceInCents, 18550);
+    EXPECT_EQ(levels[0].quantity, 50);
+}
+
