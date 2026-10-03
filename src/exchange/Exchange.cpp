@@ -43,7 +43,7 @@ namespace exchange
         return it->second;
     }
 
-    std::vector<Trade> Exchange::submitOrder(Order order)
+    SubmissionResult Exchange::submitOrder(Order order)
     {
         if (orderSymbols_.find(order.id) != orderSymbols_.end())
         {
@@ -63,9 +63,9 @@ namespace exchange
 
         MatchingEngine& engine = engineIt->second;
 
-        std::vector<Trade> trades = engine.submitOrder(order);
+        auto result = engine.submitOrder(order);
 
-        for (const Trade& trade : trades)
+        for (const Trade& trade : result.trades)
         {
             const Order* buyOrder = engine.orderBook().findOrder(trade.buyOrderId);
 
@@ -97,7 +97,7 @@ namespace exchange
             orderSymbols_[order.id] = order.symbol;
         }
 
-        return trades;
+        return result;
     }
 
     void Exchange::cancelOrder(const OrderId& orderId)

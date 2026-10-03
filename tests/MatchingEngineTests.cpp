@@ -13,7 +13,7 @@ TEST(MatchingEngineTest, BuyOrderRestsWhenThereAreNoAsks)
 {
     exchange::MatchingEngine engine("AAPL");
 
-    auto trades = engine.submitOrder({
+    auto result = engine.submitOrder({
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
@@ -22,7 +22,7 @@ TEST(MatchingEngineTest, BuyOrderRestsWhenThereAreNoAsks)
         18550
     });
 
-    EXPECT_TRUE(trades.empty());
+    EXPECT_TRUE(result.trades.empty());
 
     ASSERT_NE(engine.orderBook().bestBid(), nullptr);
 
@@ -41,7 +41,7 @@ TEST(MatchingEngineTest, SellOrderRestsWhenThereAreNoBids)
 {
     exchange::MatchingEngine engine("AAPL");
 
-    auto trades = engine.submitOrder({
+    auto result = engine.submitOrder({
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
@@ -50,7 +50,7 @@ TEST(MatchingEngineTest, SellOrderRestsWhenThereAreNoBids)
         18560
     });
 
-    EXPECT_TRUE(trades.empty());
+    EXPECT_TRUE(result.trades.empty());
 
     ASSERT_NE(engine.orderBook().bestAsk(), nullptr);
 
@@ -78,7 +78,7 @@ TEST(MatchingEngineTest, OrdersDoNotMatchWhenPricesDoNotCross)
         18550
     });
 
-    auto trades = engine.submitOrder({
+    auto result = engine.submitOrder({
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
@@ -87,7 +87,7 @@ TEST(MatchingEngineTest, OrdersDoNotMatchWhenPricesDoNotCross)
         18560
     });
 
-    EXPECT_TRUE(trades.empty());
+    EXPECT_TRUE(result.trades.empty());
 
     ASSERT_NE(engine.orderBook().bestBid(), nullptr);
     ASSERT_NE(engine.orderBook().bestAsk(), nullptr);
@@ -116,7 +116,7 @@ TEST(MatchingEngineTest, MatchesOrdersAtSamePrice)
         18550
     });
 
-    auto trades = engine.submitOrder({
+    auto result = engine.submitOrder({
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
@@ -125,12 +125,12 @@ TEST(MatchingEngineTest, MatchesOrdersAtSamePrice)
         18550
     });
 
-    ASSERT_EQ(trades.size(), 1);
+    ASSERT_EQ(result.trades.size(), 1);
 
-    EXPECT_EQ(trades[0].buyOrderId, exchange::OrderId{101});
-    EXPECT_EQ(trades[0].sellOrderId, exchange::OrderId{201});
-    EXPECT_EQ(trades[0].quantity, 100);
-    EXPECT_EQ(trades[0].priceInCents, 18550);
+    EXPECT_EQ(result.trades[0].buyOrderId, exchange::OrderId{101});
+    EXPECT_EQ(result.trades[0].sellOrderId, exchange::OrderId{201});
+    EXPECT_EQ(result.trades[0].quantity, 100);
+    EXPECT_EQ(result.trades[0].priceInCents, 18550);
 
     EXPECT_TRUE(engine.orderBook().empty());
 }
@@ -148,7 +148,7 @@ TEST(MatchingEngineTest, BuyOrderMatchesCheaperAsk)
         18550
     });
 
-    auto trades = engine.submitOrder({
+    auto result = engine.submitOrder({
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
@@ -157,12 +157,12 @@ TEST(MatchingEngineTest, BuyOrderMatchesCheaperAsk)
         18600
     });
 
-    ASSERT_EQ(trades.size(), 1);
+    ASSERT_EQ(result.trades.size(), 1);
 
-    EXPECT_EQ(trades[0].quantity, 100);
+    EXPECT_EQ(result.trades[0].quantity, 100);
 
     // Trade happens at resting ask price
-    EXPECT_EQ(trades[0].priceInCents, 18550);
+    EXPECT_EQ(result.trades[0].priceInCents, 18550);
 
     EXPECT_TRUE(engine.orderBook().empty());
 }
@@ -180,7 +180,7 @@ TEST(MatchingEngineTest, PartialFillLeavesRemainingIncomingOrderInBook)
         18550
     });
 
-    auto trades = engine.submitOrder({
+    auto result = engine.submitOrder({
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
@@ -189,9 +189,9 @@ TEST(MatchingEngineTest, PartialFillLeavesRemainingIncomingOrderInBook)
         18550
     });
 
-    ASSERT_EQ(trades.size(), 1);
+    ASSERT_EQ(result.trades.size(), 1);
 
-    EXPECT_EQ(trades[0].quantity, 50);
+    EXPECT_EQ(result.trades[0].quantity, 50);
 
     ASSERT_NE(engine.orderBook().bestBid(), nullptr);
 
@@ -225,7 +225,7 @@ TEST(MatchingEngineTest, PartialFillLeavesRemainingRestingOrderInBook)
         18550
     });
 
-    auto trades = engine.submitOrder({
+    auto result = engine.submitOrder({
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
@@ -234,9 +234,9 @@ TEST(MatchingEngineTest, PartialFillLeavesRemainingRestingOrderInBook)
         18550
     });
 
-    ASSERT_EQ(trades.size(), 1);
+    ASSERT_EQ(result.trades.size(), 1);
 
-    EXPECT_EQ(trades[0].quantity, 50);
+    EXPECT_EQ(result.trades[0].quantity, 50);
 
     const exchange::Order* remainingOrder =
         engine.orderBook().findOrder(exchange::OrderId{201});
@@ -278,7 +278,7 @@ TEST(MatchingEngineTest, MatchesOrdersAtSamePriceInFifoOrder)
         18550
     });
 
-    auto trades = engine.submitOrder({
+    auto result = engine.submitOrder({
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
@@ -287,21 +287,21 @@ TEST(MatchingEngineTest, MatchesOrdersAtSamePriceInFifoOrder)
         18550
     });
 
-    ASSERT_EQ(trades.size(), 2);
+    ASSERT_EQ(result.trades.size(), 2);
 
     EXPECT_EQ(
-        trades[0].sellOrderId,
+        result.trades[0].sellOrderId,
         exchange::OrderId{201}
     );
 
-    EXPECT_EQ(trades[0].quantity, 50);
+    EXPECT_EQ(result.trades[0].quantity, 50);
 
     EXPECT_EQ(
-        trades[1].sellOrderId,
+        result.trades[1].sellOrderId,
         exchange::OrderId{202}
     );
 
-    EXPECT_EQ(trades[1].quantity, 25);
+    EXPECT_EQ(result.trades[1].quantity, 25);
 
     const exchange::Order* remainingOrder =
         engine.orderBook().findOrder(exchange::OrderId{202});
@@ -345,7 +345,7 @@ TEST(MatchingEngineTest, MatchesBestPricesBeforeWorsePrices)
         18570
     });
 
-    auto trades = engine.submitOrder({
+    auto result = engine.submitOrder({
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
@@ -354,13 +354,13 @@ TEST(MatchingEngineTest, MatchesBestPricesBeforeWorsePrices)
         18570
     });
 
-    ASSERT_EQ(trades.size(), 2);
+    ASSERT_EQ(result.trades.size(), 2);
 
-    EXPECT_EQ(trades[0].priceInCents, 18550);
-    EXPECT_EQ(trades[0].quantity, 50);
+    EXPECT_EQ(result.trades[0].priceInCents, 18550);
+    EXPECT_EQ(result.trades[0].quantity, 50);
 
-    EXPECT_EQ(trades[1].priceInCents, 18560);
-    EXPECT_EQ(trades[1].quantity, 50);
+    EXPECT_EQ(result.trades[1].priceInCents, 18560);
+    EXPECT_EQ(result.trades[1].quantity, 50);
 
     const exchange::Order* remainingOrder =
         engine.orderBook().findOrder(exchange::OrderId{203});
@@ -395,7 +395,7 @@ TEST(MatchingEngineTest, StopsMatchingWhenNextPriceDoesNotCross)
         18600
     });
 
-    auto trades = engine.submitOrder({
+    auto result = engine.submitOrder({
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
@@ -404,10 +404,10 @@ TEST(MatchingEngineTest, StopsMatchingWhenNextPriceDoesNotCross)
         18550
     });
 
-    ASSERT_EQ(trades.size(), 1);
+    ASSERT_EQ(result.trades.size(), 1);
 
-    EXPECT_EQ(trades[0].quantity, 50);
-    EXPECT_EQ(trades[0].priceInCents, 18550);
+    EXPECT_EQ(result.trades[0].quantity, 50);
+    EXPECT_EQ(result.trades[0].priceInCents, 18550);
 
     ASSERT_NE(engine.orderBook().bestBid(), nullptr);
     ASSERT_NE(engine.orderBook().bestAsk(), nullptr);
@@ -445,7 +445,7 @@ TEST(MatchingEngineTest, SellOrderMatchesBestBidsFirst)
         18550
     });
 
-    auto trades = engine.submitOrder({
+    auto result = engine.submitOrder({
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
@@ -454,13 +454,13 @@ TEST(MatchingEngineTest, SellOrderMatchesBestBidsFirst)
         18550
     });
 
-    ASSERT_EQ(trades.size(), 2);
+    ASSERT_EQ(result.trades.size(), 2);
 
-    EXPECT_EQ(trades[0].priceInCents, 18600);
-    EXPECT_EQ(trades[0].quantity, 50);
+    EXPECT_EQ(result.trades[0].priceInCents, 18600);
+    EXPECT_EQ(result.trades[0].quantity, 50);
 
-    EXPECT_EQ(trades[1].priceInCents, 18550);
-    EXPECT_EQ(trades[1].quantity, 50);
+    EXPECT_EQ(result.trades[1].priceInCents, 18550);
+    EXPECT_EQ(result.trades[1].quantity, 50);
 
     EXPECT_TRUE(engine.orderBook().empty());
 }
@@ -905,3 +905,109 @@ TEST(MatchingEngineTest, StoresMultipleTradesFromSingleIncomingOrder)
     EXPECT_EQ(engine.trades()[1].quantity, 50);
     EXPECT_EQ(engine.trades()[1].priceInCents, 18560);
 }
+
+TEST(MatchingEngineTest, SubmitOrderProducesAcceptedEvent)
+{
+    exchange::MatchingEngine engine("AAPL");
+
+    exchange::Order order{
+        exchange::OrderId{101},
+        "AAPL",
+        exchange::Side::Buy,
+        100,
+        100,
+        18550
+    };
+
+    auto result = engine.submitOrder(order);
+
+    ASSERT_EQ(result.events.size(), 1);
+
+    EXPECT_EQ(
+        result.events[0].type,
+        exchange::OrderEventType::Accepted
+    );
+
+    EXPECT_EQ(result.events[0].orderId.value, 101);
+    EXPECT_EQ(result.events[0].remainingQuantity, 100);
+    EXPECT_EQ(result.events[0].priceInCents, 18550);
+
+    EXPECT_TRUE(result.trades.empty());
+}
+
+TEST(MatchingEngineTest, FullyExecutedOrderProducesAcceptedEventAndTrade)
+{
+    exchange::MatchingEngine engine("AAPL");
+
+    engine.submitOrder({
+        exchange::OrderId{201},
+        "AAPL",
+        exchange::Side::Sell,
+        100,
+        100,
+        18550
+    });
+
+    auto result = engine.submitOrder({
+        exchange::OrderId{101},
+        "AAPL",
+        exchange::Side::Buy,
+        100,
+        100,
+        18560
+    });
+
+    ASSERT_EQ(result.events.size(), 1);
+    EXPECT_EQ(
+        result.events[0].type,
+        exchange::OrderEventType::Accepted
+    );
+
+    ASSERT_EQ(result.trades.size(), 1);
+
+    EXPECT_EQ(result.trades[0].buyOrderId.value, 101);
+    EXPECT_EQ(result.trades[0].sellOrderId.value, 201);
+    EXPECT_EQ(result.trades[0].quantity, 100);
+    EXPECT_EQ(result.trades[0].priceInCents, 18550);
+}
+
+TEST(MatchingEngineTest, PartiallyExecutedOrderProducesTradeAndRestsRemainder)
+{
+    exchange::MatchingEngine engine("AAPL");
+
+    engine.submitOrder({
+        exchange::OrderId{201},
+        "AAPL",
+        exchange::Side::Sell,
+        40,
+        40,
+        18550
+    });
+
+    auto result = engine.submitOrder({
+        exchange::OrderId{101},
+        "AAPL",
+        exchange::Side::Buy,
+        100,
+        100,
+        18560
+    });
+
+    ASSERT_EQ(result.events.size(), 1);
+    EXPECT_EQ(
+        result.events[0].type,
+        exchange::OrderEventType::Accepted
+    );
+
+    ASSERT_EQ(result.trades.size(), 1);
+    EXPECT_EQ(result.trades[0].quantity, 40);
+
+    const exchange::Order* remaining =
+        engine.orderBook().findOrder(
+            exchange::OrderId{101}
+        );
+
+    ASSERT_NE(remaining, nullptr);
+    EXPECT_EQ(remaining->remainingQuantity, 60);
+}
+

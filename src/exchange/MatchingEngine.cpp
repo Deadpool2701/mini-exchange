@@ -15,15 +15,22 @@ namespace exchange
         return orderBook_;
     }
 
-    std::vector<Trade> MatchingEngine::submitOrder(Order order)
+    SubmissionResult MatchingEngine::submitOrder(Order order)
     {
-        std::vector<Trade> trades;
+        SubmissionResult result;
         if (order.symbol != orderBook_.symbol())
         {
             throw std::invalid_argument(
                 "Order symbol does not match MatchingEngine symbol"
             );
         }
+
+        result.events.push_back(OrderEvent{
+            OrderEventType::Accepted,
+            order.id,
+            order.remainingQuantity,
+            order.priceInCents
+        });
 
         if (order.side == Side::Buy)
         {
@@ -50,7 +57,7 @@ namespace exchange
                     bestAsk->price()
                 };
 
-                trades.push_back(trade);
+                result.trades.push_back(trade);
                 trades_.push_back(trade);
 
                 orderBook_.fillOrder(bestAskOrderId, fillQuantity);
@@ -82,7 +89,7 @@ namespace exchange
                     bestBid->price()
                 };
 
-                trades.push_back(trade);
+                result.trades.push_back(trade);
                 trades_.push_back(trade);
 
                 orderBook_.fillOrder(bestBidOrderId, fillQuantity);
@@ -95,7 +102,7 @@ namespace exchange
             orderBook_.addOrder(order);
         }
 
-        return trades;
+        return result;
     }
 
     void MatchingEngine::cancelOrder(const OrderId& orderId)

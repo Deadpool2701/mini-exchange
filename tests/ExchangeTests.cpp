@@ -125,7 +125,7 @@ TEST(ExchangeTest, OrdersForDifferentSymbolsDoNotMatch)
         18550
     });
 
-    auto trades = exchange.submitOrder({
+    auto result = exchange.submitOrder({
         exchange::OrderId{102},
         "MSFT",
         exchange::Side::Buy,
@@ -134,7 +134,7 @@ TEST(ExchangeTest, OrdersForDifferentSymbolsDoNotMatch)
         20000
     });
 
-    EXPECT_TRUE(trades.empty());
+    EXPECT_TRUE(result.trades.empty());
 
     EXPECT_FALSE(
         exchange.matchingEngine("AAPL")
@@ -212,7 +212,7 @@ TEST(ExchangeTest, FullyFilledIncomingOrderCannotBeCancelled)
         18550
     });
 
-    auto trades = exchange.submitOrder({
+    auto result = exchange.submitOrder({
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
@@ -221,7 +221,7 @@ TEST(ExchangeTest, FullyFilledIncomingOrderCannotBeCancelled)
         18550
     });
 
-    ASSERT_EQ(trades.size(), 1);
+    ASSERT_EQ(result.trades.size(), 1);
 
     EXPECT_THROW(
         exchange.cancelOrder(exchange::OrderId{102}),
@@ -424,7 +424,7 @@ TEST(ExchangeTest, MatchingOccursIndependentlyPerSymbol)
         18550
     });
 
-    ASSERT_EQ(aaplTrades.size(), 1);
+    ASSERT_EQ(aaplTrades.trades.size(), 1);
 
     EXPECT_FALSE(
         exchange.matchingEngine("MSFT")

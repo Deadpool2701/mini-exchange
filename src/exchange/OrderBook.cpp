@@ -420,4 +420,28 @@ namespace exchange
         }
         return askLevels;
     }
+
+    std::vector<BookLevel> OrderBook::bids(std::size_t depth) const
+    {
+        std::vector<BookLevel> bidLevels;
+        for (const auto& [price, priceLevel] : bids_)
+        {
+            if(bidLevels.size()==depth)
+                break;
+            bidLevels.push_back({price, priceLevel.totalQuantity()});
+        }
+        return bidLevels;
+    }
+
+    std::vector<BookLevel> OrderBook::asks(std::size_t depth) const
+    {
+        std::vector<BookLevel> askLevels;
+        for (const auto& [price, priceLevel] : asks_)
+        {
+            if(askLevels.size()==depth)
+                break;
+            askLevels.push_back({price, priceLevel.totalQuantity()});
+        }
+        return askLevels;
+    }
 }

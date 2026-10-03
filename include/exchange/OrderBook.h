@@ -6,6 +6,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <cstddef>
 
 #include <exchange/BookLevel.h>
 #include <exchange/Order.h>
@@ -45,6 +46,9 @@ namespace exchange
 
             std::vector<BookLevel> bids() const;
             std::vector<BookLevel> asks() const;
+
+            std::vector<BookLevel> bids(std::size_t depth) const;
+            std::vector<BookLevel> asks(std::size_t depth) const;            
 
         private:
             std::string symbol_;

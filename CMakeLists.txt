@@ -65,6 +65,7 @@ add_executable(unit_tests
     tests/TradeTests.cpp
     tests/MatchingEngineTests.cpp
     tests/ExchangeTests.cpp
+    tests/OrderEventTests.cpp
 )
 
 target_link_libraries(unit_tests

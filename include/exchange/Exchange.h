@@ -7,6 +7,7 @@
 #include "exchange/MatchingEngine.h"
 #include "exchange/OrderId.h"
 #include "exchange/Trade.h"
+#include "exchange/SubmissionResult.h"
 
 namespace exchange
 {
@@ -19,7 +20,7 @@ namespace exchange
 
         const MatchingEngine& matchingEngine(const std::string& symbol) const;
 
-        std::vector<Trade> submitOrder(Order order);
+        SubmissionResult submitOrder(Order order);
 
         void cancelOrder(const OrderId& orderId);
 
