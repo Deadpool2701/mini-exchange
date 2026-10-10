@@ -20,6 +20,27 @@ namespace exchange
             );
         }
 
+        if (order.type == OrderType::Limit)
+        {
+            if (order.priceInCents <= 0)
+            {
+                throw std::invalid_argument(
+                    "Limit order price must be greater than zero"
+                );
+            }
+        }
+        if (order.symbol.empty())
+        {
+            throw std::invalid_argument(
+                "Order symbol cannot be empty"
+            );
+        }
+        if (order.id.value == 0)
+        {
+            throw std::invalid_argument(
+                "Order ID must be greater than zero"
+            );
+        }
         if (order.symbol != symbol_)
         {
             throw std::invalid_argument(
@@ -27,10 +48,24 @@ namespace exchange
             );
         }
 
+        if (order.quantity == 0)
+        {
+            throw std::invalid_argument(
+                "Order quantity must be greater than zero"
+            );
+        }
+
         if (order.remainingQuantity == 0)
         {
             throw std::invalid_argument(
                 "Cannot add an order with zero remaining quantity"
+            );
+        }
+
+        if (order.remainingQuantity > order.quantity)
+        {
+            throw std::invalid_argument(
+                "Remaining quantity cannot exceed order quantity"
             );
         }
 

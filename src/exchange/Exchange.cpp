@@ -43,8 +43,15 @@ namespace exchange
         return it->second;
     }
 
-    SubmissionResult Exchange::submitOrder(Order order)
+    OrderResult Exchange::submitOrder(Order order)
     {
+
+        if (usedOrderIds_.find(order.id) != usedOrderIds_.end())
+        {
+            throw std::invalid_argument(
+                "Order ID has already been used in Exchange"
+            );
+        }
         if (orderSymbols_.find(order.id) != orderSymbols_.end())
         {
             throw std::invalid_argument(
@@ -63,7 +70,9 @@ namespace exchange
 
         MatchingEngine& engine = engineIt->second;
 
-        auto result = engine.submitOrder(order);
+        OrderResult result = engine.submitOrder(order);
+
+        usedOrderIds_.insert(order.id);
 
         for (const Trade& trade : result.trades)
         {
@@ -100,18 +109,20 @@ namespace exchange
         return result;
     }
 
-    void Exchange::cancelOrder(const OrderId& orderId)
+    OrderResult Exchange::cancelOrder(const OrderId& orderId)
     {
         std::string symbol = orderSymbols_.at(orderId);
         auto& engine = engines_.at(symbol);
-        engine.cancelOrder(orderId);
+        OrderResult result = engine.cancelOrder(orderId);
         orderSymbols_.erase(orderId);
+        return result;
     }
 
-    void Exchange::amendOrder(const OrderId& orderId, uint64_t newQuantity, int64_t newPriceInCents)
+    OrderResult Exchange::amendOrder(const OrderId& orderId, uint64_t newQuantity, int64_t newPriceInCents)
     {
         std::string symbol = orderSymbols_.at(orderId);
         auto& engine = engines_.at(symbol);
-        engine.amendOrder(orderId, newQuantity, newPriceInCents);
+        OrderResult result = engine.amendOrder(orderId, newQuantity, newPriceInCents);
+        return result;
     }
 } // namespace exchange

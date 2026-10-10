@@ -91,6 +91,7 @@ TEST(ExchangeTest, RoutesOrderToCorrectMatchingEngine)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -120,6 +121,7 @@ TEST(ExchangeTest, OrdersForDifferentSymbolsDoNotMatch)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -129,6 +131,7 @@ TEST(ExchangeTest, OrdersForDifferentSymbolsDoNotMatch)
         exchange::OrderId{102},
         "MSFT",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         20000
@@ -160,6 +163,7 @@ TEST(ExchangeTest, RejectsOrderForUnknownSymbol)
             exchange::OrderId{101},
             "MSFT",
             exchange::Side::Buy,
+        exchange::OrderType::Limit,
             100,
             100,
             18550
@@ -179,6 +183,7 @@ TEST(ExchangeTest, RejectsDuplicateActiveOrderIdAcrossSymbols)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -189,6 +194,7 @@ TEST(ExchangeTest, RejectsDuplicateActiveOrderIdAcrossSymbols)
             exchange::OrderId{101},
             "MSFT",
             exchange::Side::Buy,
+        exchange::OrderType::Limit,
             100,
             100,
             30000
@@ -207,6 +213,7 @@ TEST(ExchangeTest, FullyFilledIncomingOrderCannotBeCancelled)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -216,6 +223,7 @@ TEST(ExchangeTest, FullyFilledIncomingOrderCannotBeCancelled)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -239,6 +247,7 @@ TEST(ExchangeTest, FullyFilledRestingOrderCannotBeCancelled)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -248,6 +257,7 @@ TEST(ExchangeTest, FullyFilledRestingOrderCannotBeCancelled)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -269,6 +279,7 @@ TEST(ExchangeTest, PartiallyFilledRestingOrderCanStillBeCancelled)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -278,6 +289,7 @@ TEST(ExchangeTest, PartiallyFilledRestingOrderCanStillBeCancelled)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         40,
         40,
         18550
@@ -305,6 +317,7 @@ TEST(ExchangeTest, CancelsOrderWithoutKnowingSymbol)
         exchange::OrderId{101},
         "MSFT",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         30000
@@ -329,6 +342,7 @@ TEST(ExchangeTest, CancelledOrderCannotBeCancelledAgain)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -352,6 +366,7 @@ TEST(ExchangeTest, AmendsOrderWithoutKnowingSymbol)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -401,6 +416,7 @@ TEST(ExchangeTest, MatchingOccursIndependentlyPerSymbol)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -410,6 +426,7 @@ TEST(ExchangeTest, MatchingOccursIndependentlyPerSymbol)
         exchange::OrderId{201},
         "MSFT",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         30000
@@ -419,6 +436,7 @@ TEST(ExchangeTest, MatchingOccursIndependentlyPerSymbol)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -433,3 +451,78 @@ TEST(ExchangeTest, MatchingOccursIndependentlyPerSymbol)
     );
 }
 
+TEST(ExchangeTest, RejectsReuseOfPreviouslyUsedOrderId)
+{
+    exchange::Exchange exchange;
+
+    exchange.addSymbol("AAPL");
+
+    exchange.submitOrder({
+        exchange::OrderId{201},
+        "AAPL",
+        exchange::Side::Sell,
+        exchange::OrderType::Limit,
+        100,
+        100,
+        18550
+    });
+
+    auto result = exchange.submitOrder({
+        exchange::OrderId{101},
+        "AAPL",
+        exchange::Side::Buy,
+        exchange::OrderType::Limit,
+        100,
+        100,
+        18560
+    });
+
+    ASSERT_EQ(result.trades.size(), 1);
+
+    EXPECT_THROW(
+        exchange.submitOrder({
+            exchange::OrderId{101},
+            "AAPL",
+            exchange::Side::Buy,
+        exchange::OrderType::Limit,
+            50,
+            50,
+            18540
+        }),
+        std::invalid_argument
+    );
+}
+
+TEST(ExchangeTest, RejectsReuseOfCancelledOrderId)
+{
+    exchange::Exchange exchange;
+
+    exchange.addSymbol("AAPL");
+
+    exchange.submitOrder({
+        exchange::OrderId{101},
+        "AAPL",
+        exchange::Side::Buy,
+        exchange::OrderType::Limit,
+        100,
+        100,
+        18550
+    });
+
+    exchange.cancelOrder(
+        exchange::OrderId{101}
+    );
+
+    EXPECT_THROW(
+        exchange.submitOrder({
+            exchange::OrderId{101},
+            "AAPL",
+            exchange::Side::Buy,
+        exchange::OrderType::Limit,
+            50,
+            50,
+            18540
+        }),
+        std::invalid_argument
+    );
+}

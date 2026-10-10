@@ -8,6 +8,7 @@ TEST(OrderTest, CreatesBuyOrder)
         exchange::OrderId{1},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -27,6 +28,7 @@ TEST(OrderTest, PartiallyFillsOrder)
         exchange::OrderId{1},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -44,6 +46,7 @@ TEST(OrderTest, RejectsFillExceedingRemainingQuantity)
         exchange::OrderId{1},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -60,6 +63,7 @@ TEST(OrderTest, FullyFillsOrder)
         exchange::OrderId{1},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -69,3 +73,40 @@ TEST(OrderTest, FullyFillsOrder)
 
     EXPECT_EQ(order.remainingQuantity, 0);
 }
+
+TEST(OrderTest, CreatesLimitOrder)
+{
+    exchange::Order order{
+        exchange::OrderId{101},
+        "AAPL",
+        exchange::Side::Buy,
+        exchange::OrderType::Limit,
+        100,
+        100,
+        18550
+    };
+
+    EXPECT_EQ(
+        order.type,
+        exchange::OrderType::Limit
+    );
+}
+
+TEST(OrderTest, CreatesMarketOrder)
+{
+    exchange::Order order{
+        exchange::OrderId{102},
+        "AAPL",
+        exchange::Side::Buy,
+        exchange::OrderType::Market,
+        100,
+        100,
+        0
+    };
+
+    EXPECT_EQ(
+        order.type,
+        exchange::OrderType::Market
+    );
+}
+

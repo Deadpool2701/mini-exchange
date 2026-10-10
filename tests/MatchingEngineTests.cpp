@@ -17,6 +17,7 @@ TEST(MatchingEngineTest, BuyOrderRestsWhenThereAreNoAsks)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -45,6 +46,7 @@ TEST(MatchingEngineTest, SellOrderRestsWhenThereAreNoBids)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18560
@@ -73,6 +75,7 @@ TEST(MatchingEngineTest, OrdersDoNotMatchWhenPricesDoNotCross)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -82,6 +85,7 @@ TEST(MatchingEngineTest, OrdersDoNotMatchWhenPricesDoNotCross)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18560
@@ -111,6 +115,7 @@ TEST(MatchingEngineTest, MatchesOrdersAtSamePrice)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -120,6 +125,7 @@ TEST(MatchingEngineTest, MatchesOrdersAtSamePrice)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -143,6 +149,7 @@ TEST(MatchingEngineTest, BuyOrderMatchesCheaperAsk)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -152,6 +159,7 @@ TEST(MatchingEngineTest, BuyOrderMatchesCheaperAsk)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18600
@@ -175,6 +183,7 @@ TEST(MatchingEngineTest, PartialFillLeavesRemainingIncomingOrderInBook)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         50,
         50,
         18550
@@ -184,6 +193,7 @@ TEST(MatchingEngineTest, PartialFillLeavesRemainingIncomingOrderInBook)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -220,6 +230,7 @@ TEST(MatchingEngineTest, PartialFillLeavesRemainingRestingOrderInBook)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -229,6 +240,7 @@ TEST(MatchingEngineTest, PartialFillLeavesRemainingRestingOrderInBook)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         50,
         50,
         18550
@@ -264,6 +276,7 @@ TEST(MatchingEngineTest, MatchesOrdersAtSamePriceInFifoOrder)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         50,
         50,
         18550
@@ -273,6 +286,7 @@ TEST(MatchingEngineTest, MatchesOrdersAtSamePriceInFifoOrder)
         exchange::OrderId{202},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         50,
         50,
         18550
@@ -282,6 +296,7 @@ TEST(MatchingEngineTest, MatchesOrdersAtSamePriceInFifoOrder)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         75,
         75,
         18550
@@ -322,6 +337,7 @@ TEST(MatchingEngineTest, MatchesBestPricesBeforeWorsePrices)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         50,
         50,
         18550
@@ -331,6 +347,7 @@ TEST(MatchingEngineTest, MatchesBestPricesBeforeWorsePrices)
         exchange::OrderId{202},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         50,
         50,
         18560
@@ -340,6 +357,7 @@ TEST(MatchingEngineTest, MatchesBestPricesBeforeWorsePrices)
         exchange::OrderId{203},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         50,
         50,
         18570
@@ -349,6 +367,7 @@ TEST(MatchingEngineTest, MatchesBestPricesBeforeWorsePrices)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18570
@@ -381,6 +400,7 @@ TEST(MatchingEngineTest, StopsMatchingWhenNextPriceDoesNotCross)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         50,
         50,
         18550
@@ -390,6 +410,7 @@ TEST(MatchingEngineTest, StopsMatchingWhenNextPriceDoesNotCross)
         exchange::OrderId{202},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         50,
         50,
         18600
@@ -399,6 +420,7 @@ TEST(MatchingEngineTest, StopsMatchingWhenNextPriceDoesNotCross)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -431,6 +453,7 @@ TEST(MatchingEngineTest, SellOrderMatchesBestBidsFirst)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         50,
         50,
         18600
@@ -440,6 +463,7 @@ TEST(MatchingEngineTest, SellOrderMatchesBestBidsFirst)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         50,
         50,
         18550
@@ -449,6 +473,7 @@ TEST(MatchingEngineTest, SellOrderMatchesBestBidsFirst)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -473,6 +498,7 @@ TEST(MatchingEngineTest, CancelsRestingOrder)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -491,6 +517,7 @@ TEST(MatchingEngineTest, CancellingOrderPreservesOtherOrders)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -500,6 +527,7 @@ TEST(MatchingEngineTest, CancellingOrderPreservesOtherOrders)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         50,
         50,
         18550
@@ -537,6 +565,7 @@ TEST(MatchingEngineTest, ReducingOrderQuantityPreservesOrder)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -572,6 +601,7 @@ TEST(MatchingEngineTest, ReducingQuantityPreservesFifoPriority)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -581,6 +611,7 @@ TEST(MatchingEngineTest, ReducingQuantityPreservesFifoPriority)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -613,6 +644,7 @@ TEST(MatchingEngineTest, IncreasingQuantityPreservesFifoPriority)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -622,6 +654,7 @@ TEST(MatchingEngineTest, IncreasingQuantityPreservesFifoPriority)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -654,6 +687,7 @@ TEST(MatchingEngineTest, ChangingOrderPriceMovesOrderToNewPriceLevel)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -688,6 +722,7 @@ TEST(MatchingEngineTest, ChangingPriceAndQuantityUpdatesOrder)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -744,6 +779,7 @@ TEST(MatchingEngineTest, AmendingToZeroQuantityThrows)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -783,6 +819,7 @@ TEST(MatchingEngineTest, StoresCompletedTradeInHistory)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -792,6 +829,7 @@ TEST(MatchingEngineTest, StoresCompletedTradeInHistory)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -821,6 +859,7 @@ TEST(MatchingEngineTest, TradeHistoryAccumulatesAcrossOrders)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -830,6 +869,7 @@ TEST(MatchingEngineTest, TradeHistoryAccumulatesAcrossOrders)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -839,6 +879,7 @@ TEST(MatchingEngineTest, TradeHistoryAccumulatesAcrossOrders)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         50,
         50,
         18560
@@ -848,6 +889,7 @@ TEST(MatchingEngineTest, TradeHistoryAccumulatesAcrossOrders)
         exchange::OrderId{202},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         50,
         50,
         18560
@@ -874,6 +916,7 @@ TEST(MatchingEngineTest, StoresMultipleTradesFromSingleIncomingOrder)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -883,6 +926,7 @@ TEST(MatchingEngineTest, StoresMultipleTradesFromSingleIncomingOrder)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18560
@@ -892,6 +936,7 @@ TEST(MatchingEngineTest, StoresMultipleTradesFromSingleIncomingOrder)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         150,
         150,
         18560
@@ -914,6 +959,7 @@ TEST(MatchingEngineTest, SubmitOrderProducesAcceptedEvent)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -943,6 +989,7 @@ TEST(MatchingEngineTest, FullyExecutedOrderProducesAcceptedEventAndTrade)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -952,6 +999,7 @@ TEST(MatchingEngineTest, FullyExecutedOrderProducesAcceptedEventAndTrade)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18560
@@ -979,6 +1027,7 @@ TEST(MatchingEngineTest, PartiallyExecutedOrderProducesTradeAndRestsRemainder)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         40,
         40,
         18550
@@ -988,6 +1037,7 @@ TEST(MatchingEngineTest, PartiallyExecutedOrderProducesTradeAndRestsRemainder)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18560
@@ -1009,5 +1059,88 @@ TEST(MatchingEngineTest, PartiallyExecutedOrderProducesTradeAndRestsRemainder)
 
     ASSERT_NE(remaining, nullptr);
     EXPECT_EQ(remaining->remainingQuantity, 60);
+}
+
+TEST(MatchingEngineTest, CancelOrderProducesCancelledEvent)
+{
+    exchange::MatchingEngine engine("AAPL");
+
+    engine.submitOrder({
+        exchange::OrderId{101},
+        "AAPL",
+        exchange::Side::Buy,
+        exchange::OrderType::Limit,
+        100,
+        100,
+        18550
+    });
+
+    auto result =
+        engine.cancelOrder(exchange::OrderId{101});
+
+    ASSERT_EQ(result.events.size(), 1);
+    EXPECT_EQ(
+        result.events[0].type,
+        exchange::OrderEventType::Cancelled
+    );
+
+    EXPECT_EQ(result.events[0].orderId.value, 101);
+    EXPECT_EQ(result.events[0].remainingQuantity, 0);
+    EXPECT_EQ(result.events[0].priceInCents, 18550);
+
+    EXPECT_TRUE(
+        engine.orderBook().findOrder(
+            exchange::OrderId{101}
+        ) == nullptr
+    );
+}
+TEST(MatchingEngineTest, AmendOrderProducesAmendedEvent)
+{
+    exchange::MatchingEngine engine("AAPL");
+
+    engine.submitOrder({
+        exchange::OrderId{101},
+        "AAPL",
+        exchange::Side::Buy,
+        exchange::OrderType::Limit,
+        100,
+        100,
+        18550
+    });
+
+    auto result = engine.amendOrder(
+        exchange::OrderId{101},
+        75,
+        18560
+    );
+
+    ASSERT_EQ(result.events.size(), 1);
+
+    EXPECT_EQ(
+        result.events[0].type,
+        exchange::OrderEventType::Amended
+    );
+
+    EXPECT_EQ(result.events[0].orderId.value, 101);
+    EXPECT_EQ(result.events[0].remainingQuantity, 75);
+    EXPECT_EQ(result.events[0].priceInCents, 18560);
+}
+
+TEST(MatchingEngineTest, RejectsUnsupportedMarketOrder)
+{
+    exchange::MatchingEngine engine("AAPL");
+
+    EXPECT_THROW(
+        engine.submitOrder({
+            exchange::OrderId{101},
+            "AAPL",
+            exchange::Side::Buy,
+            exchange::OrderType::Market,
+            100,
+            100,
+            0
+        }),
+        std::invalid_argument
+    );
 }
 

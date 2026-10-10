@@ -2,11 +2,12 @@
 
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 #include "exchange/Order.h"
 #include "exchange/OrderBook.h"
 #include "exchange/Trade.h"
-#include "exchange/SubmissionResult.h"
+#include "exchange/OrderResult.h"
 
 namespace exchange
 {
@@ -15,19 +16,20 @@ namespace exchange
     public:
         explicit MatchingEngine(std::string symbol);
 
-        SubmissionResult submitOrder(Order order);
+        OrderResult submitOrder(Order order);
 
-        void cancelOrder(const OrderId& orderId);
+        OrderResult cancelOrder(const OrderId& orderId);
 
         const OrderBook& orderBook() const;
 
-        void amendOrder(const OrderId& orderId, uint64_t newQuantity, int64_t newPriceInCents );
+        OrderResult amendOrder(const OrderId& orderId, uint64_t newQuantity, int64_t newPriceInCents );
 
         const std::vector<Trade>& trades() const;
 
     private:
         OrderBook orderBook_;
         std::vector<Trade> trades_;
+        std::unordered_set<OrderId, OrderIdHash> usedOrderIds_;
     };
 
 } // namespace exchange

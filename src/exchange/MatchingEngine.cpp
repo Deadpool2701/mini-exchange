@@ -15,9 +15,22 @@ namespace exchange
         return orderBook_;
     }
 
-    SubmissionResult MatchingEngine::submitOrder(Order order)
+    OrderResult MatchingEngine::submitOrder(Order order)
     {
-        SubmissionResult result;
+        if (usedOrderIds_.find(order.id) != usedOrderIds_.end())
+        {
+            throw std::invalid_argument(
+                "Order ID has already been used in MatchingEngine"
+            );
+        }
+
+        if (order.type == OrderType::Market)
+        {
+            throw std::invalid_argument(
+                "Market orders are not supported yet"
+            );
+        }
+        OrderResult result;
         if (order.symbol != orderBook_.symbol())
         {
             throw std::invalid_argument(
@@ -31,6 +44,8 @@ namespace exchange
             order.remainingQuantity,
             order.priceInCents
         });
+
+        usedOrderIds_.insert(order.id);
 
         if (order.side == Side::Buy)
         {
@@ -105,14 +120,46 @@ namespace exchange
         return result;
     }
 
-    void MatchingEngine::cancelOrder(const OrderId& orderId)
+    OrderResult MatchingEngine::cancelOrder(const OrderId& orderId)
     {
+        OrderResult result;
+        const Order* order = orderBook_.findOrder(orderId);
+
+        if (order == nullptr)
+        {
+            throw std::invalid_argument("Order ID not found in OrderBook");
+        }
+
+        result.events.push_back(OrderEvent{OrderEventType::Cancelled, order->id, 0, order->priceInCents});
         orderBook_.cancelOrder(orderId);
+        return result;
     }
 
-    void MatchingEngine::amendOrder(const OrderId& orderId, uint64_t newQuantity, int64_t newPriceInCents)
+    OrderResult MatchingEngine::amendOrder(const OrderId& orderId, uint64_t newQuantity, int64_t newPriceInCents)
     {
+        OrderResult result;
+        const Order* order = orderBook_.findOrder(orderId);
+        if (order == nullptr)
+        {
+            throw std::invalid_argument("Order ID not found in OrderBook");
+        }
+
         orderBook_.amendOrder(orderId, newQuantity, newPriceInCents);
+
+        const Order* amendedOrder = orderBook_.findOrder(orderId);
+        if (amendedOrder == nullptr)
+        {
+            throw std::logic_error("OrderBook is inconsistent: amended order not found");
+        }
+
+        result.events.push_back(OrderEvent{ 
+            OrderEventType::Amended, 
+            amendedOrder->id,
+            amendedOrder->remainingQuantity,
+            amendedOrder->priceInCents
+        });
+
+        return result;
     }
 
     const std::vector<Trade>& MatchingEngine::trades() const

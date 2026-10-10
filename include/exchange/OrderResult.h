@@ -7,7 +7,7 @@
 
 namespace exchange
 {
-    struct SubmissionResult
+    struct OrderResult
     {
         std::vector<OrderEvent> events;
         std::vector<Trade> trades;

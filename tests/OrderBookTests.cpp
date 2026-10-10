@@ -21,6 +21,7 @@ TEST(OrderBookTest, AddsBuyOrder)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -41,6 +42,7 @@ TEST(OrderBookTest, AddsSellOrder)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18560
@@ -61,6 +63,7 @@ TEST(OrderBookTest, RejectsOrderForDifferentSymbol)
         exchange::OrderId{101},
         "MSFT",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -82,6 +85,7 @@ TEST(OrderBookTest, RejectsZeroQuantityOrder)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         0,
         0,
         18550
@@ -117,6 +121,7 @@ TEST(OrderBookTest, BestBidIsHighestPrice)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18540
@@ -126,6 +131,7 @@ TEST(OrderBookTest, BestBidIsHighestPrice)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18560
@@ -135,6 +141,7 @@ TEST(OrderBookTest, BestBidIsHighestPrice)
         exchange::OrderId{103},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -152,6 +159,7 @@ TEST(OrderBookTest, BestAskIsLowestPrice)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18580
@@ -161,6 +169,7 @@ TEST(OrderBookTest, BestAskIsLowestPrice)
         exchange::OrderId{202},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18560
@@ -170,6 +179,7 @@ TEST(OrderBookTest, BestAskIsLowestPrice)
         exchange::OrderId{203},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18570
@@ -187,6 +197,7 @@ TEST(OrderBookTest, OrdersAtSameBidPriceRemainFifo)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -196,6 +207,7 @@ TEST(OrderBookTest, OrdersAtSameBidPriceRemainFifo)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         50,
         50,
         18550
@@ -217,6 +229,7 @@ TEST(OrderBookTest, CancelsOrder)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -236,6 +249,7 @@ TEST(OrderBookTest, CancelsOrderWithoutRemovingOtherOrders)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -245,6 +259,7 @@ TEST(OrderBookTest, CancelsOrderWithoutRemovingOtherOrders)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         50,
         50,
         18550
@@ -270,6 +285,7 @@ TEST(OrderBookTest, CancellingLastOrderRemovesPriceLevel)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -279,6 +295,7 @@ TEST(OrderBookTest, CancellingLastOrderRemovesPriceLevel)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         50,
         50,
         18560
@@ -298,6 +315,7 @@ TEST(OrderBookTest, CancellingUnknownOrderThrows)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -317,6 +335,7 @@ TEST(OrderBookTest, RejectsDuplicateOrderId)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -327,6 +346,7 @@ TEST(OrderBookTest, RejectsDuplicateOrderId)
             exchange::OrderId{101},
             "AAPL",
             exchange::Side::Buy,
+        exchange::OrderType::Limit,
             50,
             50,
             18560
@@ -347,6 +367,7 @@ TEST(OrderBookTest, CancelsSellOrder)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18560
@@ -366,6 +387,7 @@ TEST(OrderBookTest, CancellingOrderPreservesOtherPriceLevels)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -375,6 +397,7 @@ TEST(OrderBookTest, CancellingOrderPreservesOtherPriceLevels)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18560
@@ -394,6 +417,7 @@ TEST(OrderBookTest, FindsExistingOrder)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -426,6 +450,7 @@ TEST(OrderBookTest, FindOrderReturnsMutableOrder)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -449,6 +474,7 @@ TEST(OrderBookTest, PartiallyFillsOrder)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -479,6 +505,7 @@ TEST(OrderBookTest, FullyFillsAndRemovesOrder)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -502,6 +529,7 @@ TEST(OrderBookTest, PartialFillKeepsOrderAtFrontOfPriceLevel)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -511,6 +539,7 @@ TEST(OrderBookTest, PartialFillKeepsOrderAtFrontOfPriceLevel)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         50,
         50,
         18550
@@ -539,6 +568,7 @@ TEST(OrderBookTest, FullFillMovesToNextOrderInFifoQueue)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -548,6 +578,7 @@ TEST(OrderBookTest, FullFillMovesToNextOrderInFifoQueue)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         50,
         50,
         18550
@@ -576,6 +607,7 @@ TEST(OrderBookTest, RejectsFillGreaterThanRemainingQuantity)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -616,6 +648,7 @@ TEST(OrderBookTest, ReturnsBidLevelsHighestPriceFirst)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18540
@@ -625,6 +658,7 @@ TEST(OrderBookTest, ReturnsBidLevelsHighestPriceFirst)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         50,
         50,
         18560
@@ -634,6 +668,7 @@ TEST(OrderBookTest, ReturnsBidLevelsHighestPriceFirst)
         exchange::OrderId{103},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         75,
         75,
         18550
@@ -656,6 +691,7 @@ TEST(OrderBookTest, ReturnsAskLevelsLowestPriceFirst)
         exchange::OrderId{201},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         100,
         100,
         18580
@@ -665,6 +701,7 @@ TEST(OrderBookTest, ReturnsAskLevelsLowestPriceFirst)
         exchange::OrderId{202},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         50,
         50,
         18560
@@ -674,6 +711,7 @@ TEST(OrderBookTest, ReturnsAskLevelsLowestPriceFirst)
         exchange::OrderId{203},
         "AAPL",
         exchange::Side::Sell,
+        exchange::OrderType::Limit,
         75,
         75,
         18570
@@ -696,6 +734,7 @@ TEST(OrderBookTest, AggregatesQuantityAtSameBidPrice)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -705,6 +744,7 @@ TEST(OrderBookTest, AggregatesQuantityAtSameBidPrice)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         50,
         50,
         18550
@@ -726,6 +766,7 @@ TEST(OrderBookTest, BookLevelReflectsCancellation)
         exchange::OrderId{101},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         100,
         100,
         18550
@@ -735,6 +776,7 @@ TEST(OrderBookTest, BookLevelReflectsCancellation)
         exchange::OrderId{102},
         "AAPL",
         exchange::Side::Buy,
+        exchange::OrderType::Limit,
         50,
         50,
         18550
@@ -754,10 +796,14 @@ TEST(OrderBookTest, ReturnsRequestedNumberOfBidLevels)
 {
     exchange::OrderBook book("AAPL");
 
-    book.addOrder({exchange::OrderId{101}, "AAPL", exchange::Side::Buy, 100, 100, 18540});
-    book.addOrder({exchange::OrderId{102}, "AAPL", exchange::Side::Buy, 50, 50, 18560});
-    book.addOrder({exchange::OrderId{103}, "AAPL", exchange::Side::Buy, 75, 75, 18550});
-    book.addOrder({exchange::OrderId{104}, "AAPL", exchange::Side::Buy, 25, 25, 18530});
+    book.addOrder({exchange::OrderId{101}, "AAPL", exchange::Side::Buy,
+        exchange::OrderType::Limit, 100, 100, 18540});
+    book.addOrder({exchange::OrderId{102}, "AAPL", exchange::Side::Buy,
+        exchange::OrderType::Limit, 50, 50, 18560});
+    book.addOrder({exchange::OrderId{103}, "AAPL", exchange::Side::Buy,
+        exchange::OrderType::Limit, 75, 75, 18550});
+    book.addOrder({exchange::OrderId{104}, "AAPL", exchange::Side::Buy,
+        exchange::OrderType::Limit, 25, 25, 18530});
 
     auto levels = book.bids(2);
 
@@ -774,10 +820,14 @@ TEST(OrderBookTest, ReturnsRequestedNumberOfAskLevels)
 {
     exchange::OrderBook book("AAPL");
 
-    book.addOrder({exchange::OrderId{201}, "AAPL", exchange::Side::Sell, 100, 100, 18580});
-    book.addOrder({exchange::OrderId{202}, "AAPL", exchange::Side::Sell, 50, 50, 18560});
-    book.addOrder({exchange::OrderId{203}, "AAPL", exchange::Side::Sell, 75, 75, 18570});
-    book.addOrder({exchange::OrderId{204}, "AAPL", exchange::Side::Sell, 25, 25, 18590});
+    book.addOrder({exchange::OrderId{201}, "AAPL", exchange::Side::Sell,
+        exchange::OrderType::Limit, 100, 100, 18580});
+    book.addOrder({exchange::OrderId{202}, "AAPL", exchange::Side::Sell,
+        exchange::OrderType::Limit, 50, 50, 18560});
+    book.addOrder({exchange::OrderId{203}, "AAPL", exchange::Side::Sell,
+        exchange::OrderType::Limit, 75, 75, 18570});
+    book.addOrder({exchange::OrderId{204}, "AAPL", exchange::Side::Sell,
+        exchange::OrderType::Limit, 25, 25, 18590});
 
     auto levels = book.asks(2);
 
@@ -794,7 +844,8 @@ TEST(OrderBookTest, ZeroDepthReturnsNoBidLevels)
 {
     exchange::OrderBook book("AAPL");
 
-    book.addOrder({exchange::OrderId{101}, "AAPL", exchange::Side::Buy, 100, 100, 18550});
+    book.addOrder({exchange::OrderId{101}, "AAPL", exchange::Side::Buy,
+        exchange::OrderType::Limit, 100, 100, 18550});
 
     auto levels = book.bids(0);
 
@@ -805,7 +856,8 @@ TEST(OrderBookTest, ZeroDepthReturnsNoAskLevels)
 {
     exchange::OrderBook book("AAPL");
 
-    book.addOrder({exchange::OrderId{101}, "AAPL", exchange::Side::Sell, 100, 100, 18550});
+    book.addOrder({exchange::OrderId{101}, "AAPL", exchange::Side::Sell,
+        exchange::OrderType::Limit, 100, 100, 18550});
 
     auto levels = book.asks(0);
 
@@ -816,8 +868,10 @@ TEST(OrderBookTest, DepthGreaterThanAvailableBidLevelsReturnsAllLevels)
 {
     exchange::OrderBook book("AAPL");
 
-    book.addOrder({exchange::OrderId{101}, "AAPL", exchange::Side::Buy, 100, 100, 18550});
-    book.addOrder({exchange::OrderId{102}, "AAPL", exchange::Side::Buy, 100, 100, 18540});
+    book.addOrder({exchange::OrderId{101}, "AAPL", exchange::Side::Buy,
+        exchange::OrderType::Limit, 100, 100, 18550});
+    book.addOrder({exchange::OrderId{102}, "AAPL", exchange::Side::Buy,
+        exchange::OrderType::Limit, 100, 100, 18540});
 
     auto levels = book.bids(10);
 
@@ -831,9 +885,12 @@ TEST(OrderBookTest, DepthViewReflectsRemainingQuantityAfterFill)
 {
     exchange::OrderBook book("AAPL");
 
-    book.addOrder({exchange::OrderId{101}, "AAPL", exchange::Side::Buy, 100, 100, 18560});
-    book.addOrder({exchange::OrderId{102}, "AAPL", exchange::Side::Buy, 50, 50, 18550});
-    book.addOrder({exchange::OrderId{103}, "AAPL", exchange::Side::Buy, 75, 75, 18540});
+    book.addOrder({exchange::OrderId{101}, "AAPL", exchange::Side::Buy,
+        exchange::OrderType::Limit, 100, 100, 18560});
+    book.addOrder({exchange::OrderId{102}, "AAPL", exchange::Side::Buy,
+        exchange::OrderType::Limit, 50, 50, 18550});
+    book.addOrder({exchange::OrderId{103}, "AAPL", exchange::Side::Buy,
+        exchange::OrderType::Limit, 75, 75, 18540});
 
     book.fillOrder(exchange::OrderId{101}, 40);
 
@@ -852,9 +909,12 @@ TEST(OrderBookTest, DepthViewReflectsCancellation)
 {
     exchange::OrderBook book("AAPL");
 
-    book.addOrder({exchange::OrderId{101}, "AAPL", exchange::Side::Buy, 100, 100, 18560});
-    book.addOrder({exchange::OrderId{102}, "AAPL", exchange::Side::Buy, 50, 50, 18550});
-    book.addOrder({exchange::OrderId{103}, "AAPL", exchange::Side::Buy, 75, 75, 18540});
+    book.addOrder({exchange::OrderId{101}, "AAPL", exchange::Side::Buy,
+        exchange::OrderType::Limit, 100, 100, 18560});
+    book.addOrder({exchange::OrderId{102}, "AAPL", exchange::Side::Buy,
+        exchange::OrderType::Limit, 50, 50, 18550});
+    book.addOrder({exchange::OrderId{103}, "AAPL", exchange::Side::Buy,
+        exchange::OrderType::Limit, 75, 75, 18540});
 
     book.cancelOrder(exchange::OrderId{101});
 
@@ -869,3 +929,92 @@ TEST(OrderBookTest, DepthViewReflectsCancellation)
     EXPECT_EQ(levels[1].quantity, 75);
 }
 
+TEST(OrderBookTest, RejectsZeroOrderId)
+{
+    exchange::OrderBook book("AAPL");
+
+    EXPECT_THROW(
+        book.addOrder({
+            exchange::OrderId{0},
+            "AAPL",
+            exchange::Side::Buy,
+            exchange::OrderType::Limit,
+            100,
+            100,
+            18550
+        }),
+        std::invalid_argument
+    );
+}
+
+TEST(OrderBookTest, RejectsZeroQuantity)
+{
+    exchange::OrderBook book("AAPL");
+
+    EXPECT_THROW(
+        book.addOrder({
+            exchange::OrderId{101},
+            "AAPL",
+            exchange::Side::Buy,
+        exchange::OrderType::Limit,
+            0,
+            0,
+            18550
+        }),
+        std::invalid_argument
+    );
+}
+
+TEST(OrderBookTest, RejectsRemainingQuantityGreaterThanQuantity)
+{
+    exchange::OrderBook book("AAPL");
+
+    EXPECT_THROW(
+        book.addOrder({
+            exchange::OrderId{101},
+            "AAPL",
+            exchange::Side::Buy,
+        exchange::OrderType::Limit,
+            100,
+            101,
+            18550
+        }),
+        std::invalid_argument
+    );
+}
+
+TEST(OrderBookTest, RejectsNegativePrice)
+{
+    exchange::OrderBook book("AAPL");
+
+    EXPECT_THROW(
+        book.addOrder({
+            exchange::OrderId{101},
+            "AAPL",
+            exchange::Side::Buy,
+        exchange::OrderType::Limit,
+            100,
+            100,
+            -1
+        }),
+        std::invalid_argument
+    );
+}
+
+TEST(OrderBookTest, RejectsLimitOrderWithInvalidPrice)
+{
+    exchange::OrderBook book("AAPL");
+
+    EXPECT_THROW(
+        book.addOrder({
+            exchange::OrderId{101},
+            "AAPL",
+            exchange::Side::Buy,
+            exchange::OrderType::Limit,
+            100,
+            100,
+            0
+        }),
+        std::invalid_argument
+    );
+}

@@ -3,11 +3,12 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <unordered_set>
 
 #include "exchange/MatchingEngine.h"
 #include "exchange/OrderId.h"
 #include "exchange/Trade.h"
-#include "exchange/SubmissionResult.h"
+#include "exchange/OrderResult.h"
 
 namespace exchange
 {
@@ -20,15 +21,17 @@ namespace exchange
 
         const MatchingEngine& matchingEngine(const std::string& symbol) const;
 
-        SubmissionResult submitOrder(Order order);
+        OrderResult submitOrder(Order order);
 
-        void cancelOrder(const OrderId& orderId);
+        OrderResult cancelOrder(const OrderId& orderId);
 
-        void amendOrder(const OrderId& orderId, uint64_t newQuantity, int64_t newPriceInCents);
+        OrderResult amendOrder(const OrderId& orderId, uint64_t newQuantity, int64_t newPriceInCents);
 
     private:
         std::unordered_map<std::string, MatchingEngine> engines_;
 
         std::unordered_map<OrderId, std::string, OrderIdHash> orderSymbols_;
+
+        std::unordered_set<OrderId, OrderIdHash> usedOrderIds_;
     };
 }
