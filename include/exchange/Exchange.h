@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <vector>
 #include <unordered_set>
+#include <optional>
 
 #include "exchange/MatchingEngine.h"
 #include "exchange/OrderId.h"
@@ -26,6 +27,10 @@ namespace exchange
         OrderResult cancelOrder(const OrderId& orderId);
 
         OrderResult amendOrder(const OrderId& orderId, uint64_t newQuantity, int64_t newPriceInCents);
+
+        std::optional<Order> findActiveOrder( const OrderId& orderId) const;
+
+        const std::vector<Trade>& tradesForSymbol( const std::string& symbol ) const;
 
     private:
         std::unordered_map<std::string, MatchingEngine> engines_;

@@ -1018,3 +1018,195 @@ TEST(OrderBookTest, RejectsLimitOrderWithInvalidPrice)
         std::invalid_argument
     );
 }
+
+TEST(OrderBookTest, RejectsMarketOrder)
+{
+    exchange::OrderBook book("AAPL");
+
+    EXPECT_THROW(
+        book.addOrder({
+            exchange::OrderId{701},
+            "AAPL",
+            exchange::Side::Buy,
+            exchange::OrderType::Market,
+            100,
+            100,
+            0
+        }),
+        std::invalid_argument
+    );
+
+    EXPECT_TRUE(book.empty());
+
+    EXPECT_EQ(
+        book.findOrder(exchange::OrderId{701}),
+        nullptr
+    );
+}
+
+TEST(OrderBookTest, AskLevelQuantityRemainsConsistentAcrossOperations)
+{
+    exchange::OrderBook book("AAPL");
+
+    // Two sell orders at the same price.
+    book.addOrder({
+        exchange::OrderId{1401},
+        "AAPL",
+        exchange::Side::Sell,
+        exchange::OrderType::Limit,
+        100,
+        100,
+        18550
+    });
+
+    book.addOrder({
+        exchange::OrderId{1402},
+        "AAPL",
+        exchange::Side::Sell,
+        exchange::OrderType::Limit,
+        60,
+        60,
+        18550
+    });
+
+    // A third order at a worse ask price.
+    book.addOrder({
+        exchange::OrderId{1403},
+        "AAPL",
+        exchange::Side::Sell,
+        exchange::OrderType::Limit,
+        40,
+        40,
+        18600
+    });
+
+    // Initially, the best ask level contains 160 shares.
+    ASSERT_NE(book.bestAsk(), nullptr);
+    EXPECT_EQ(book.bestAsk()->price(), 18550);
+    EXPECT_EQ(book.bestAsk()->totalQuantity(), 160);
+
+    // Partially fill the first order.
+    book.fillOrder(exchange::OrderId{1401}, 30);
+
+    const exchange::Order* firstOrder =
+        book.findOrder(exchange::OrderId{1401});
+
+    ASSERT_NE(firstOrder, nullptr);
+    EXPECT_EQ(firstOrder->remainingQuantity, 70);
+
+    ASSERT_NE(book.bestAsk(), nullptr);
+    EXPECT_EQ(book.bestAsk()->totalQuantity(), 130);
+
+    // Cancel the second order at the same price.
+    book.cancelOrder(exchange::OrderId{1402});
+
+    EXPECT_EQ(
+        book.findOrder(exchange::OrderId{1402}),
+        nullptr
+    );
+
+    ASSERT_NE(book.bestAsk(), nullptr);
+    EXPECT_EQ(book.bestAsk()->price(), 18550);
+    EXPECT_EQ(book.bestAsk()->totalQuantity(), 70);
+
+    // Completely fill the remaining quantity at the best ask.
+    book.fillOrder(exchange::OrderId{1401}, 70);
+
+    EXPECT_EQ(
+        book.findOrder(exchange::OrderId{1401}),
+        nullptr
+    );
+
+    // The empty price level must be removed.
+    ASSERT_NE(book.bestAsk(), nullptr);
+    EXPECT_EQ(book.bestAsk()->price(), 18600);
+    EXPECT_EQ(book.bestAsk()->totalQuantity(), 40);
+
+    EXPECT_EQ(
+        book.findOrder(exchange::OrderId{1403})->remainingQuantity,
+        40
+    );
+}
+
+TEST(OrderBookTest, BestBidAndAskRemainCorrectAcrossPriceLevels)
+{
+    exchange::OrderBook book("AAPL");
+
+    // Add bids in deliberately unsorted order.
+    book.addOrder({
+        exchange::OrderId{1501},
+        "AAPL",
+        exchange::Side::Buy,
+        exchange::OrderType::Limit,
+        100,
+        100,
+        18500
+    });
+
+    book.addOrder({
+        exchange::OrderId{1502},
+        "AAPL",
+        exchange::Side::Buy,
+        exchange::OrderType::Limit,
+        100,
+        100,
+        18600
+    });
+
+    book.addOrder({
+        exchange::OrderId{1503},
+        "AAPL",
+        exchange::Side::Buy,
+        exchange::OrderType::Limit,
+        100,
+        100,
+        18550
+    });
+
+    // Add asks in deliberately unsorted order.
+    book.addOrder({
+        exchange::OrderId{1504},
+        "AAPL",
+        exchange::Side::Sell,
+        exchange::OrderType::Limit,
+        100,
+        100,
+        18700
+    });
+
+    book.addOrder({
+        exchange::OrderId{1505},
+        "AAPL",
+        exchange::Side::Sell,
+        exchange::OrderType::Limit,
+        100,
+        100,
+        18600
+    });
+
+    book.addOrder({
+        exchange::OrderId{1506},
+        "AAPL",
+        exchange::Side::Sell,
+        exchange::OrderType::Limit,
+        100,
+        100,
+        18650
+    });
+
+    ASSERT_NE(book.bestBid(), nullptr);
+    ASSERT_NE(book.bestAsk(), nullptr);
+
+    EXPECT_EQ(book.bestBid()->price(), 18600);
+    EXPECT_EQ(book.bestAsk()->price(), 18600);
+
+    // Remove the best bid and best ask.
+    book.cancelOrder(exchange::OrderId{1502});
+    book.cancelOrder(exchange::OrderId{1505});
+
+    ASSERT_NE(book.bestBid(), nullptr);
+    ASSERT_NE(book.bestAsk(), nullptr);
+
+    EXPECT_EQ(book.bestBid()->price(), 18550);
+    EXPECT_EQ(book.bestAsk()->price(), 18650);
+}

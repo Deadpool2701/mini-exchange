@@ -40,6 +40,60 @@ namespace exchange
 
             remainingQuantity -= fillQuantity;
         }
+
+        void validate() const
+        {
+            if (id.value == 0)
+            {
+                throw std::invalid_argument(
+                    "Order ID must be non-zero"
+                );
+            }
+
+            if (symbol.empty())
+            {
+                throw std::invalid_argument(
+                    "Order symbol must not be empty"
+                );
+            }
+
+            if (side != Side::Buy && side != Side::Sell)
+            {
+                throw std::invalid_argument(
+                    "Invalid order side"
+                );
+            }
+
+            if (quantity == 0 ||
+                remainingQuantity == 0 ||
+                remainingQuantity > quantity)
+            {
+                throw std::invalid_argument(
+                    "Invalid order quantity"
+                );
+            }
+
+            switch (type)
+            {
+                case OrderType::Limit:
+                    if (priceInCents <= 0)
+                    {
+                        throw std::invalid_argument(
+                            "Limit order price must be positive"
+                        );
+                    }
+                    break;
+
+                case OrderType::Market:
+                    // Market orders have no limit-price constraint.
+                    break;
+
+                default:
+                    throw std::invalid_argument(
+                        "Invalid order type"
+                    );
+            }
+        }
     };
 
 

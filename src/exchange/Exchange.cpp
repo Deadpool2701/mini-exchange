@@ -111,18 +111,94 @@ namespace exchange
 
     OrderResult Exchange::cancelOrder(const OrderId& orderId)
     {
-        std::string symbol = orderSymbols_.at(orderId);
-        auto& engine = engines_.at(symbol);
-        OrderResult result = engine.cancelOrder(orderId);
-        orderSymbols_.erase(orderId);
+        auto symbolIt = orderSymbols_.find(orderId);
+
+        if (symbolIt == orderSymbols_.end())
+        {
+            throw std::invalid_argument(
+                "Cannot cancel order: order is not active in Exchange"
+            );
+        }
+
+        auto engineIt = engines_.find(symbolIt->second);
+
+        if (engineIt == engines_.end())
+        {
+            throw std::logic_error(
+                "Exchange is inconsistent: order symbol has no MatchingEngine"
+            );
+        }
+
+        OrderResult result = engineIt->second.cancelOrder(orderId);
+
+        orderSymbols_.erase(symbolIt);
+
         return result;
     }
 
-    OrderResult Exchange::amendOrder(const OrderId& orderId, uint64_t newQuantity, int64_t newPriceInCents)
+    OrderResult Exchange::amendOrder(
+        const OrderId& orderId,
+        uint64_t newQuantity,
+        int64_t newPriceInCents
+    )
     {
-        std::string symbol = orderSymbols_.at(orderId);
-        auto& engine = engines_.at(symbol);
-        OrderResult result = engine.amendOrder(orderId, newQuantity, newPriceInCents);
-        return result;
+        auto symbolIt = orderSymbols_.find(orderId);
+
+        if (symbolIt == orderSymbols_.end())
+        {
+            throw std::invalid_argument(
+                "Cannot amend order: order is not active in Exchange"
+            );
+        }
+
+        auto engineIt = engines_.find(symbolIt->second);
+
+        if (engineIt == engines_.end())
+        {
+            throw std::logic_error(
+                "Exchange is inconsistent: order symbol has no MatchingEngine"
+            );
+        }
+
+        return engineIt->second.amendOrder(
+            orderId,
+            newQuantity,
+            newPriceInCents
+        );
+    }
+
+    std::optional<Order> Exchange::findActiveOrder( const OrderId& orderId ) const
+    {
+        auto symbolIt = orderSymbols_.find(orderId);
+
+        if (symbolIt == orderSymbols_.end())
+        {
+            return std::nullopt;
+        }
+
+        auto engineIt = engines_.find(symbolIt->second);
+
+        if (engineIt == engines_.end())
+        {
+            throw std::logic_error(
+                "Exchange is inconsistent: active order has no MatchingEngine"
+            );
+        }
+
+        const Order* order = engineIt->second.orderBook().findOrder(orderId);
+
+        if (order == nullptr)
+        {
+            throw std::logic_error(
+                "Exchange is inconsistent: active order is missing from OrderBook"
+            );
+        }
+
+        return *order;
+    }
+
+    const std::vector<Trade>& Exchange::tradesForSymbol( const std::string& symbol ) const
+    {
+        return matchingEngine(symbol).trades();
     }
 } // namespace exchange

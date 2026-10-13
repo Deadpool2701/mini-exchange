@@ -18,6 +18,7 @@ add_library(exchange
     src/exchange/OrderBook.cpp
     src/exchange/MatchingEngine.cpp
     src/exchange/Exchange.cpp
+    src/exchange/ExchangeReplay.cpp
 )
 
 target_include_directories(exchange
