@@ -5,10 +5,7 @@
 
 namespace exchange
 {
-    void ExchangeReplay::apply(
-        Exchange& exchange,
-        const ExchangeCommand& command
-    )
+    void ExchangeReplay::apply( Exchange& exchange, const ExchangeCommand& command )
     {
         std::visit(
             [&exchange](const auto& cmd)

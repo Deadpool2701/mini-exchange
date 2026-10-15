@@ -19,6 +19,7 @@ add_library(exchange
     src/exchange/MatchingEngine.cpp
     src/exchange/Exchange.cpp
     src/exchange/ExchangeReplay.cpp
+    src/exchange/ExchangeCommandLog.cpp
 )
 
 target_include_directories(exchange
@@ -67,6 +68,7 @@ add_executable(unit_tests
     tests/MatchingEngineTests.cpp
     tests/ExchangeTests.cpp
     tests/OrderEventTests.cpp
+    tests/ExchangeCommandLogTests.cpp
 )
 
 target_link_libraries(unit_tests
