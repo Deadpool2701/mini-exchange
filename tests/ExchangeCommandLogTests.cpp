@@ -178,3 +178,48 @@ TEST(ExchangeCommandLogTest, RejectsMissingFile)
         std::runtime_error
     );
 }
+
+TEST(
+    ExchangeCommandLogTest,
+    AppendsCommandsWithoutOverwritingExistingHistory
+)
+{
+    TemporaryLog log;
+
+    exchange::ExchangeCommandLog::append(
+        log.path(),
+        exchange::AddSymbolCommand{"AAPL"}
+    );
+
+    exchange::ExchangeCommandLog::append(
+        log.path(),
+        exchange::SubmitOrderCommand{
+            exchange::Order{
+                exchange::OrderId{1701},
+                "AAPL",
+                exchange::Side::Sell,
+                exchange::OrderType::Limit,
+                100,
+                100,
+                18550
+            }
+        }
+    );
+
+    const auto commands =
+        exchange::ExchangeCommandLog::read(log.path());
+
+    ASSERT_EQ(commands.size(), 2U);
+
+    EXPECT_TRUE(
+        std::holds_alternative<exchange::AddSymbolCommand>(
+            commands[0]
+        )
+    );
+
+    EXPECT_TRUE(
+        std::holds_alternative<exchange::SubmitOrderCommand>(
+            commands[1]
+        )
+    );
+}

@@ -7,6 +7,8 @@
 #include <stdexcept>
 #include <type_traits>
 #include <variant>
+#include <filesystem>
+#include <utility>
 
 namespace exchange
 {
@@ -344,5 +346,127 @@ namespace exchange
         }
 
         return commands;
+    }
+
+    void ExchangeCommandLog::append(
+        const std::string& path,
+        const ExchangeCommand& command
+    )
+    {
+        // Serialize first, before modifying the destination file.
+        std::ostringstream record;
+        writeCommand(record, command);
+        record << '\n';
+
+        if (!record)
+        {
+            throw std::runtime_error(
+                "Failed to serialize command for log: " + path
+            );
+        }
+
+        std::error_code error;
+        const bool exists = std::filesystem::exists(path, error);
+
+        if (error)
+        {
+            throw std::runtime_error(
+                "Unable to inspect command log: " + path
+            );
+        }
+
+        bool needsHeader = !exists;
+
+        if (exists)
+        {
+            const auto size = std::filesystem::file_size(path, error);
+
+            if (error)
+            {
+                throw std::runtime_error(
+                    "Unable to inspect command log size: " + path
+                );
+            }
+
+            needsHeader = (size == 0);
+
+            if (size > 0)
+            {
+                std::ifstream in(path, std::ios::binary);
+
+                if (!in)
+                {
+                    throw std::runtime_error(
+                        "Unable to open command log for validation: " + path
+                    );
+                }
+
+                std::string header;
+
+                if (!std::getline(in, header) || header != Header)
+                {
+                    throw std::runtime_error(
+                        "Unsupported or invalid command log header"
+                    );
+                }
+
+                // Do not append to a file that ends with a partial record.
+                in.clear();
+                in.seekg(-1, std::ios::end);
+
+                char lastCharacter{};
+
+                if (!in.get(lastCharacter) || lastCharacter != '\n')
+                {
+                    throw std::runtime_error(
+                        "Cannot append to command log with an incomplete "
+                        "final record: " + path
+                    );
+                }
+            }
+        }
+
+        // Initialize a new or empty file with the format header.
+        if (needsHeader)
+        {
+            std::ofstream init(path, std::ios::out | std::ios::trunc);
+
+            if (!init)
+            {
+                throw std::runtime_error(
+                    "Unable to initialize command log: " + path
+                );
+            }
+
+            init << Header << '\n';
+            init.flush();
+
+            if (!init)
+            {
+                throw std::runtime_error(
+                    "Failed to initialize command log: " + path
+                );
+            }
+        }
+
+        // Append the serialized record without truncating existing history.
+        std::ofstream out(path, std::ios::out | std::ios::app);
+
+        if (!out)
+        {
+            throw std::runtime_error(
+                "Unable to open command log for appending: " + path
+            );
+        }
+
+        out << record.str();
+        out.flush();
+
+        if (!out)
+        {
+            throw std::runtime_error(
+                "Failed to append command to log: " + path
+            );
+        }
     }
 }

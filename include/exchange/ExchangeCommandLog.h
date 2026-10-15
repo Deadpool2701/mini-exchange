@@ -18,5 +18,10 @@ namespace exchange
         static std::vector<ExchangeCommand> read(
             const std::string& path
         );
+
+        static void append(
+            const std::string& path,
+            const ExchangeCommand& command
+        );
     };
 }
