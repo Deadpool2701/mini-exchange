@@ -20,6 +20,7 @@ add_library(exchange
     src/exchange/Exchange.cpp
     src/exchange/ExchangeReplay.cpp
     src/exchange/ExchangeCommandLog.cpp
+    src/exchange/LoggedExchange.cpp
 )
 
 target_include_directories(exchange
@@ -69,6 +70,7 @@ add_executable(unit_tests
     tests/ExchangeTests.cpp
     tests/OrderEventTests.cpp
     tests/ExchangeCommandLogTests.cpp
+    tests/LoggedExchangeTests.cpp
 )
 
 target_link_libraries(unit_tests
