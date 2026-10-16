@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <variant>
 
 namespace
 {
@@ -221,5 +222,84 @@ TEST(
         std::holds_alternative<exchange::SubmitOrderCommand>(
             commands[1]
         )
+    );
+}
+
+TEST(
+    ExchangeCommandLogTest,
+    RejectsNegativeOrderId
+)
+{
+    TemporaryLog log;
+
+    {
+        std::ofstream out(log.path());
+        out << "MINI_EXCHANGE_COMMAND_LOG 1\n";
+        out << "CANCEL_ORDER -1\n";
+    }
+
+    EXPECT_THROW(
+        exchange::ExchangeCommandLog::read(log.path()),
+        std::runtime_error
+    );
+}
+
+TEST(
+    ExchangeCommandLogTest,
+    FailedWritePreservesExistingLog
+)
+{
+    TemporaryLog log;
+
+    const std::vector<exchange::ExchangeCommand> original{
+        exchange::AddSymbolCommand{"AAPL"}
+    };
+
+    exchange::ExchangeCommandLog::write(log.path(), original);
+
+    const std::vector<exchange::ExchangeCommand> invalid{
+        exchange::AddSymbolCommand{"BAD\nSYMBOL"}
+    };
+
+    EXPECT_THROW(
+        exchange::ExchangeCommandLog::write(log.path(), invalid),
+        std::invalid_argument
+    );
+
+    const auto recovered =
+        exchange::ExchangeCommandLog::read(log.path());
+
+    ASSERT_EQ(recovered.size(), 1U);
+    ASSERT_TRUE(
+        std::holds_alternative<exchange::AddSymbolCommand>(
+            recovered[0]
+        )
+    );
+
+    EXPECT_EQ(
+        std::get<exchange::AddSymbolCommand>(recovered[0]).symbol,
+        "AAPL"
+    );
+}
+
+TEST(
+    ExchangeCommandLogTest,
+    RejectsAppendWhenExistingHistoryIsMalformed
+)
+{
+    TemporaryLog log;
+
+    {
+        std::ofstream out(log.path());
+        out << "MINI_EXCHANGE_COMMAND_LOG 1\n";
+        out << "CANCEL_ORDER -1\n";
+    }
+
+    EXPECT_THROW(
+        exchange::ExchangeCommandLog::append(
+            log.path(),
+            exchange::AddSymbolCommand{"AAPL"}
+        ),
+        std::runtime_error
     );
 }

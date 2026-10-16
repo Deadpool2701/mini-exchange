@@ -9,6 +9,8 @@
 #include <variant>
 #include <filesystem>
 #include <utility>
+#include <charconv>
+#include <system_error>
 
 namespace exchange
 {
@@ -159,6 +161,60 @@ namespace exchange
             );
         }
 
+        std::uint64_t parseUnsigned(
+            const std::string& value,
+            std::size_t lineNumber,
+            const std::string& field
+        )
+        {
+            std::uint64_t result{};
+
+            const auto [end, error] = std::from_chars(
+                value.data(),
+                value.data() + value.size(),
+                result
+            );
+
+            if (value.empty() ||
+                error != std::errc{} ||
+                end != value.data() + value.size())
+            {
+                malformed(
+                    lineNumber,
+                    "invalid unsigned integer for " + field
+                );
+            }
+
+            return result;
+        }
+
+        std::int64_t parseSigned(
+            const std::string& value,
+            std::size_t lineNumber,
+            const std::string& field
+        )
+        {
+            std::int64_t result{};
+
+            const auto [end, error] = std::from_chars(
+                value.data(),
+                value.data() + value.size(),
+                result
+            );
+
+            if (value.empty() ||
+                error != std::errc{} ||
+                end != value.data() + value.size())
+            {
+                malformed(
+                    lineNumber,
+                    "invalid signed integer for " + field
+                );
+            }
+
+            return result;
+        }
+
         ExchangeCommand parseCommand( const std::string& line, std::size_t lineNumber)
         {
             std::istringstream row(line);
@@ -186,21 +242,20 @@ namespace exchange
 
                 if (kind == "SUBMIT_ORDER")
                 {
-                    std::uint64_t id;
+                    std::string idText;
                     std::string symbol;
                     std::string side;
                     std::string type;
-                    std::uint64_t quantity;
-                    std::uint64_t remainingQuantity;
-                    std::int64_t priceInCents;
-
-                    if (!(row >> id
+                    std::string quantityText;
+                    std::string remainingQuantityText;
+                    std::string priceText;
+                    if (!(row >> idText
                               >> std::quoted(symbol)
                               >> side
                               >> type
-                              >> quantity
-                              >> remainingQuantity
-                              >> priceInCents))
+                              >> quantityText
+                              >> remainingQuantityText
+                              >> priceText))
                     {
                         malformed(lineNumber, "invalid SUBMIT_ORDER record");
                     }
@@ -209,37 +264,45 @@ namespace exchange
 
                     return SubmitOrderCommand{
                         Order{
-                            OrderId{id},
-                            std::move(symbol),
-                            parseSide(side),
-                            parseOrderType(type),
-                            quantity,
-                            remainingQuantity,
-                            priceInCents
-                        }
-                    };
+                        OrderId{
+                            parseUnsigned(idText, lineNumber, "order ID")
+                        },
+                        std::move(symbol),
+                        parseSide(side),
+                        parseOrderType(type),
+                        parseUnsigned(quantityText, lineNumber, "quantity"),
+                        parseUnsigned(
+                            remainingQuantityText,
+                            lineNumber,
+                            "remaining quantity"
+                        ),
+                        parseSigned(priceText, lineNumber, "price")
+                    }
+                };
                 }
 
                 if (kind == "CANCEL_ORDER")
                 {
-                    std::uint64_t id;
+                    std::string idText;
 
-                    if (!(row >> id))
+                    if (!(row >> idText))
                     {
                         malformed(lineNumber, "invalid CANCEL_ORDER record");
                     }
 
                     ensureNoTrailingData(row, lineNumber);
-                    return CancelOrderCommand{OrderId{id}};
+                    return CancelOrderCommand{
+                        OrderId{parseUnsigned(idText, lineNumber, "order ID")}
+                    };
                 }
 
                 if (kind == "AMEND_ORDER")
                 {
-                    std::uint64_t id;
-                    std::uint64_t newQuantity;
-                    std::int64_t newPriceInCents;
+                    std::string idText;
+                    std::string quantityText;
+                    std::string priceText;
 
-                    if (!(row >> id >> newQuantity >> newPriceInCents))
+                    if (!(row >> idText >> quantityText >> priceText))
                     {
                         malformed(lineNumber, "invalid AMEND_ORDER record");
                     }
@@ -247,9 +310,9 @@ namespace exchange
                     ensureNoTrailingData(row, lineNumber);
 
                     return AmendOrderCommand{
-                        OrderId{id},
-                        newQuantity,
-                        newPriceInCents
+                        OrderId{parseUnsigned(idText, lineNumber, "order ID")},
+                        parseUnsigned(quantityText, lineNumber, "new quantity"),
+                        parseSigned(priceText, lineNumber, "new price")
                     };
                 }
 
@@ -262,38 +325,82 @@ namespace exchange
         }
     }
 
-    void ExchangeCommandLog::write( const std::string& path, const std::vector<ExchangeCommand>& commands )
+    void ExchangeCommandLog::write(
+        const std::string& path,
+        const std::vector<ExchangeCommand>& commands
+    )
     {
-        std::ofstream out(path, std::ios::out | std::ios::trunc);
-
-        if (!out)
-        {
-            throw std::runtime_error(
-                "Unable to open command log for writing: " + path
-            );
-        }
-
-        out << Header << '\n';
+        // Validate and serialize all commands before touching the destination.
+        std::ostringstream buffer;
+        buffer << Header << '\n';
 
         for (const auto& command : commands)
         {
-            writeCommand(out, command);
-            out << '\n';
+            writeCommand(buffer, command);
+            buffer << '\n';
 
-            if (!out)
+            if (!buffer)
             {
                 throw std::runtime_error(
-                    "Failed while writing command log: " + path
+                    "Failed to serialize command log: " + path
                 );
             }
         }
 
-        out.flush();
+        const std::string contents = buffer.str();
+        const std::string temporaryPath = path + ".tmp";
 
-        if (!out)
         {
+            std::ofstream out(
+                temporaryPath,
+                std::ios::out | std::ios::binary | std::ios::trunc
+            );
+
+            if (!out)
+            {
+                throw std::runtime_error(
+                    "Unable to open temporary command log: " +
+                    temporaryPath
+                );
+            }
+
+            out.write(
+                contents.data(),
+                static_cast<std::streamsize>(contents.size())
+            );
+
+            out.flush();
+
+            if (!out)
+            {
+                throw std::runtime_error(
+                    "Failed to write temporary command log: " +
+                    temporaryPath
+                );
+            }
+
+            out.close();
+
+            if (!out)
+            {
+                throw std::runtime_error(
+                    "Failed to close temporary command log: " +
+                    temporaryPath
+                );
+            }
+        }
+
+        std::error_code error;
+        std::filesystem::rename(temporaryPath, path, error);
+
+        if (error)
+        {
+            std::error_code cleanupError;
+            std::filesystem::remove(temporaryPath, cleanupError);
+
             throw std::runtime_error(
-                "Failed to flush command log: " + path
+                "Unable to replace command log: " + path +
+                " (" + error.message() + ")"
             );
         }
     }
@@ -392,6 +499,8 @@ namespace exchange
 
             if (size > 0)
             {
+                // Validate the header and every existing command before appending.
+                static_cast<void>(read(path));
                 std::ifstream in(path, std::ios::binary);
 
                 if (!in)
