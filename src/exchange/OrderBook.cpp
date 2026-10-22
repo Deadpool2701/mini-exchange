@@ -13,13 +13,6 @@ namespace exchange
 
     void OrderBook::addOrder(const Order& order)
     {
-        if (orders_.find(order.id) != orders_.end())
-        {
-            throw std::invalid_argument(
-                "Order ID already exists in OrderBook"
-            );
-        }
-
         if (order.type != OrderType::Limit)
         {
             throw std::invalid_argument(
@@ -28,6 +21,7 @@ namespace exchange
         }
 
         order.validate();
+
         if (order.symbol != symbol_)
         {
             throw std::invalid_argument(
@@ -35,25 +29,42 @@ namespace exchange
             );
         }
 
+        auto [orderIt, inserted] = orders_.try_emplace(
+            order.id,
+            order
+        );
+
+        if (!inserted)
+        {
+            throw std::invalid_argument(
+                "Order ID already exists in OrderBook"
+            );
+        }
+
         if (order.side == Side::Buy)
         {
-            auto [it, inserted] = bids_.try_emplace(
+            auto [it, levelInserted] = bids_.try_emplace(
                 order.priceInCents,
                 order.priceInCents
             );
 
-            it->second.addOrder(order.id,order.remainingQuantity);
-        } 
-        else 
-        {
-            auto [it, inserted] = asks_.try_emplace(
-                order.priceInCents,
-                order.priceInCents
+            it->second.addOrder(
+                order.id,
+                order.remainingQuantity
             );
-
-            it->second.addOrder(order.id,order.remainingQuantity); 
         }
-        orders_.emplace(order.id, order);
+        else
+        {
+            auto [it, levelInserted] = asks_.try_emplace(
+                order.priceInCents,
+                order.priceInCents
+            );
+
+            it->second.addOrder(
+                order.id,
+                order.remainingQuantity
+            );
+        }
     }
 
     bool OrderBook::empty() const

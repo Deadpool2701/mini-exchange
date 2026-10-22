@@ -17,12 +17,6 @@ namespace exchange
 
     OrderResult MatchingEngine::submitOrder(Order order)
     {
-        if (usedOrderIds_.find(order.id) != usedOrderIds_.end())
-        {
-            throw std::invalid_argument(
-                "Order ID has already been used in MatchingEngine"
-            );
-        }
 
         order.validate();
 
@@ -31,6 +25,15 @@ namespace exchange
         {
             throw std::invalid_argument(
                 "Order symbol does not match MatchingEngine symbol"
+            );
+        }
+
+        auto [it, inserted] = usedOrderIds_.insert(order.id);
+
+        if (!inserted)
+        {
+            throw std::invalid_argument(
+                "Order ID has already been used in MatchingEngine"
             );
         }
 
@@ -43,7 +46,6 @@ namespace exchange
             order.priceInCents
         });
 
-        usedOrderIds_.insert(order.id);
 
         if (order.side == Side::Buy)
         {

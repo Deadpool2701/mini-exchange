@@ -42,6 +42,19 @@ target_link_libraries(mini_exchange
 )
 
 # -------------------------
+# Benchmarks
+# -------------------------
+
+add_executable(exchange_benchmark
+    benchmarks/ExchangeBenchmark.cpp
+)
+
+target_link_libraries(exchange_benchmark
+    PRIVATE
+    exchange
+)
+
+# -------------------------
 # GoogleTest
 # -------------------------
 
