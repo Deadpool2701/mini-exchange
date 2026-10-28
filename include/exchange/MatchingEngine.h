@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <unordered_set>
+#include <mutex>
 
 #include "exchange/Order.h"
 #include "exchange/OrderBook.h"
@@ -27,6 +28,7 @@ namespace exchange
         const std::vector<Trade>& trades() const;
 
     private:
+        mutable std::mutex mutex_;
         OrderBook orderBook_;
         std::vector<Trade> trades_;
         std::unordered_set<OrderId, OrderIdHash> usedOrderIds_;

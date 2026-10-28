@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_set>
 #include <optional>
+#include <mutex>
 
 #include "exchange/MatchingEngine.h"
 #include "exchange/OrderId.h"
@@ -33,10 +34,9 @@ namespace exchange
         const std::vector<Trade>& tradesForSymbol( const std::string& symbol ) const;
 
     private:
+        mutable std::mutex mutex_;
         std::unordered_map<std::string, MatchingEngine> engines_;
-
         std::unordered_map<OrderId, std::string, OrderIdHash> orderSymbols_;
-
         std::unordered_set<OrderId, OrderIdHash> usedOrderIds_;
     };
 }
